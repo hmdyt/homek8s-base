@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-external-base
+  namespace: dns-system
+data:
+  homek8s-base.corefile: |
+    homek8s-base.local:53 {
+        hosts {
+            # TODO: homek8s-baseノードのローカルIPに置き換える
+            192.168.0.xxx mimir.homek8s-base.local
+            192.168.0.xxx loki.homek8s-base.local
+            192.168.0.xxx tempo.homek8s-base.local
+            fallthrough
+        }
+        log
+        errors
+    }
