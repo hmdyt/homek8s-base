@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: seaweedfs-operator
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://seaweedfs.github.io/seaweedfs-operator/
+    chart: seaweedfs-operator
+    targetRevision: 0.1.12
+    helm:
+      values: |
+        # ServiceMonitor CRDへのRBAC権限を追加するために有効化
+        # 実際のServiceMonitorリソースはPrometheus Operatorがないと機能しないが、
+        # SeaweedFSのmetricsPort設定時にoperatorがServiceMonitorを作成しようとするため必要
+        serviceMonitor:
+          enabled: true
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: seaweedfs-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

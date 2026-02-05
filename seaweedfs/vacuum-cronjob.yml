@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: seaweedfs-vacuum
+  namespace: seaweedfs
+spec:
+  schedule: "0 6 * * 6"
+  timeZone: "Asia/Tokyo"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: vacuum
+              image: curlimages/curl:8.12.1
+              command: ["curl", "-sf", "http://seaweedfs-master-0.seaweedfs-master-peer.seaweedfs:9333/vol/vacuum"]
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 16Mi
+                limits:
+                  cpu: 100m
+                  memory: 32Mi
+          restartPolicy: OnFailure

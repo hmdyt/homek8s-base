@@ -1,0 +1,35 @@
+apiVersion: seaweed.seaweedfs.com/v1
+kind: Seaweed
+metadata:
+  name: seaweedfs
+  namespace: seaweedfs
+spec:
+  image: chrislusf/seaweedfs:4.07
+
+  master:
+    replicas: 1
+    volumeSizeLimitMB: 1024
+    metricsPort: 9324
+
+  volume:
+    replicas: 1
+    storageClassName: synology-iscsi-volume2
+    requests:
+      storage: 10Gi
+    metricsPort: 9325
+
+  filer:
+    replicas: 1
+    metricsPort: 9326
+    env:
+      - name: TZ
+        value: Asia/Tokyo
+    s3:
+      enabled: true
+    config: |
+      [leveldb2]
+      enabled = true
+      dir = "/data/filerldb2"
+    persistence:
+      enabled: true
+      existingClaim: seaweedfs-filer
