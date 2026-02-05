@@ -56,6 +56,10 @@ spec:
         gateway:
           enabled: true
           replicas: 1
+          service:
+            type: LoadBalancer
+            annotations:
+              metallb.universe.tf/loadBalancerIPs: "192.168.0.191"
         chunksCache:
           enabled: false
         resultsCache:
