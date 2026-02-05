@@ -62,7 +62,7 @@ spec:
               memory: 256Mi
           persistentVolume:
             enabled: true
-            storageClass: synology-iscsi-volume2
+            storageClass: local-path
             size: 1Gi
         distributor:
           replicas: 1
@@ -86,7 +86,7 @@ spec:
               memory: 1536Mi
           persistentVolume:
             enabled: true
-            storageClass: synology-iscsi-volume2
+            storageClass: local-path
             size: 5Gi
         store_gateway:
           replicas: 1
@@ -101,7 +101,7 @@ spec:
               memory: 512Mi
           persistentVolume:
             enabled: true
-            storageClass: synology-iscsi-volume2
+            storageClass: local-path
             size: 2Gi
         compactor:
           replicas: 1
@@ -114,7 +114,7 @@ spec:
               memory: 1Gi
           persistentVolume:
             enabled: true
-            storageClass: synology-iscsi-volume2
+            storageClass: local-path
             size: 5Gi
         querier:
           replicas: 1
