@@ -1,0 +1,25 @@
+# SeaweedFS OperatorがmetricsPortを設定するとServiceMonitorリソースを作成しようとする。
+# Prometheus Operatorは使っていないが、CRDがないとoperatorがエラーになるため、
+# CRDだけインストールしている。ServiceMonitorリソースは作成されるが、
+# Prometheus Operatorがいないため実質的に何もしない。
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: servicemonitor-crd
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/prometheus-operator/prometheus-operator
+    targetRevision: main
+    path: example/prometheus-operator-crd
+    directory:
+      include: 'monitoring.coreos.com_servicemonitors.yaml'
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true
