@@ -1,0 +1,10 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: synology-iscsi-volume2
+provisioner: csi.san.synology.com
+parameters:
+  fsType: ext4
+  location: '/volume2'
+reclaimPolicy: Retain
+allowVolumeExpansion: true
