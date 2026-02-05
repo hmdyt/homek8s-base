@@ -7,9 +7,9 @@ data:
   homek8s-base.corefile: |
     homek8s-base.local:53 {
         hosts {
-            192.168.0.190 mimir.homek8s-base.local
-            192.168.0.191 loki.homek8s-base.local
-            192.168.0.192 tempo.homek8s-base.local
+            192.168.0.66 mimir.homek8s-base.local
+            192.168.0.66 loki.homek8s-base.local
+            192.168.0.66 tempo.homek8s-base.local
             fallthrough
         }
         log
