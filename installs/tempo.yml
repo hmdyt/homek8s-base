@@ -34,8 +34,6 @@ spec:
                   endpoint: "0.0.0.0:4318"
         service:
           type: LoadBalancer
-          annotations:
-            metallb.universe.tf/loadBalancerIPs: "192.168.0.192"
         persistence:
           enabled: false
         serviceMonitor:

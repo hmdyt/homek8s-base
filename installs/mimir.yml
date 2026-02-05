@@ -164,8 +164,6 @@ spec:
         nginx:
           service:
             type: LoadBalancer
-            annotations:
-              metallb.universe.tf/loadBalancerIPs: "192.168.0.190"
           replicas: 1
           resources:
             requests:
