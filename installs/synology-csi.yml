@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: synology-csi
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://github.com/SynologyOpenSource/synology-csi.git
+      targetRevision: main
+      path: deploy/kubernetes/v1.20
+      directory:
+        recurse: false
+    - repoURL: https://github.com/hmdyt/homek8s-base.git
+      targetRevision: main
+      path: installs/synology-csi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: synology-csi
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
