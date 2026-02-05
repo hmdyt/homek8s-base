@@ -1,0 +1,22 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  name: grafana
+  namespace: grafana
+  labels:
+    dashboards: grafana
+spec:
+  config:
+    log:
+      mode: console
+    auth:
+      disable_login_form: "false"
+    server:
+      root_url: https://grafana.yhmd.dev
+    unified_alerting:
+      enabled: "true"
+    alerting:
+      enabled: "false"
+  deployment:
+    spec:
+      replicas: 1
