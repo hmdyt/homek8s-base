@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tempo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://grafana-community.github.io/helm-charts
+    chart: tempo
+    targetRevision: 1.26.1
+    helm:
+      valuesObject:
+        tempo:
+          multitenancyEnabled: false
+          retention: 2160h
+          storage:
+            trace:
+              backend: s3
+              s3:
+                bucket: tempo-traces
+                endpoint: seaweedfs-filer.seaweedfs.svc.cluster.local:8333
+                region: us-east-1
+                forcepathstyle: true
+                insecure: true
+              wal:
+                path: /var/tempo/wal
+          receivers:
+            otlp:
+              protocols:
+                grpc:
+                  endpoint: "0.0.0.0:4317"
+                http:
+                  endpoint: "0.0.0.0:4318"
+        persistence:
+          enabled: false
+        serviceMonitor:
+          enabled: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tempo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
