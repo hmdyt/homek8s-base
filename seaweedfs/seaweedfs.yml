@@ -26,6 +26,9 @@ spec:
         value: Asia/Tokyo
     s3:
       enabled: true
+      configSecret:
+        name: seaweedfs-s3-config
+        key: s3.json
     config: |
       [leveldb2]
       enabled = true
