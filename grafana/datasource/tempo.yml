@@ -12,7 +12,7 @@ spec:
     type: tempo
     uid: tempo
     access: proxy
-    url: http://tempo.tempo.svc:3100
+    url: http://tempo.tempo.svc:3200
     isDefault: false
     jsonData:
       timeout: "60"
