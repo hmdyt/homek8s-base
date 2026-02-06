@@ -11,6 +11,6 @@ spec:
       interval: 1m
       rules:
         - record: namespace:log_lines_total:1m
-          expr: sum by (namespace) (count_over_time({namespace=~".+"} [1m]))
+          expr: sum by (cluster, namespace) (count_over_time({namespace=~".+"} [1m]))
         - record: namespace:log_errors_total:1m
-          expr: sum by (namespace) (count_over_time({namespace=~".+", level=~"ERROR|FATAL"} [1m]))
+          expr: sum by (cluster, namespace) (count_over_time({namespace=~".+", level=~"ERROR|FATAL"} [1m]))
