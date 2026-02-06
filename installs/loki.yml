@@ -44,6 +44,13 @@ spec:
               ring:
                 kvstore:
                   store: inmemory
+              remote_write:
+                enabled: true
+                clients:
+                  mimir:
+                    url: http://mimir-nginx.mimir.svc.cluster.local:80/api/v1/push
+                    headers:
+                      X-Scope-OrgID: anonymous
             index_gateway:
               ring:
                 kvstore:
