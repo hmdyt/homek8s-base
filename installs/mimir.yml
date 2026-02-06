@@ -88,8 +88,8 @@ spec:
               cpu: 100m
               memory: 512Mi
             limits:
-              cpu: "1.5"
-              memory: 1536Mi
+              cpu: "3"
+              memory: 3Gi
           persistentVolume:
             enabled: true
             storageClass: local-path
