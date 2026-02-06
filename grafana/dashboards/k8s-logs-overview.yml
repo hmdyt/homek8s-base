@@ -14,7 +14,7 @@ spec:
       "tags": ["kubernetes", "logs"],
       "timezone": "browser",
       "schemaVersion": 39,
-      "version": 1,
+      "version": 2,
       "time": {"from": "now-15m", "to": "now"},
       "panels": [
         {
@@ -24,8 +24,8 @@ spec:
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
           "targets": [
             {
-              "datasource": {"type": "prometheus", "uid": "mimir"},
-              "expr": "namespace:log_lines_total:1m{namespace=~\"$namespace\"}",
+              "datasource": {"type": "loki", "uid": "${DS_LOKI}"},
+              "expr": "sum by (namespace) (count_over_time({cluster=\"$cluster\", namespace=~\"$namespace\"}[1m]))",
               "refId": "A",
               "legendFormat": "{{namespace}}"
             }
@@ -47,8 +47,8 @@ spec:
           "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
           "targets": [
             {
-              "datasource": {"type": "prometheus", "uid": "mimir"},
-              "expr": "namespace:log_errors_total:1m{namespace=~\"$namespace\"}",
+              "datasource": {"type": "loki", "uid": "${DS_LOKI}"},
+              "expr": "sum by (namespace) (count_over_time({cluster=\"$cluster\", namespace=~\"$namespace\"} | level=~\"ERROR|WARN|error|warn\"[1m]))",
               "refId": "A",
               "legendFormat": "{{namespace}}"
             }
@@ -71,7 +71,7 @@ spec:
           "targets": [
             {
               "datasource": {"type": "loki", "uid": "${DS_LOKI}"},
-              "expr": "{namespace=~\"$namespace\"} |~ \"$search\"",
+              "expr": "{cluster=\"$cluster\", namespace=~\"$namespace\"} |~ \"$search\"",
               "refId": "A",
               "maxLines": 200
             }
@@ -97,16 +97,27 @@ spec:
             "hide": 0
           },
           {
+            "name": "cluster",
+            "type": "query",
+            "label": "Cluster",
+            "datasource": {"type": "loki", "uid": "${DS_LOKI}"},
+            "query": "label_values(cluster)",
+            "refresh": 2,
+            "includeAll": false,
+            "multi": false,
+            "sort": 1
+          },
+          {
             "name": "namespace",
             "type": "query",
             "label": "Namespace",
-            "datasource": {"type": "prometheus", "uid": "mimir"},
-            "query": "label_values(namespace:log_lines_total:1m, namespace)",
+            "datasource": {"type": "loki", "uid": "${DS_LOKI}"},
+            "query": "label_values({cluster=\"$cluster\"}, namespace)",
             "refresh": 2,
-            "includeAll": false,
+            "includeAll": true,
+            "allValue": ".+",
             "multi": true,
-            "sort": 1,
-            "current": {}
+            "sort": 1
           },
           {
             "name": "search",
