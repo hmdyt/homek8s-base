@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: loki-recording-rules
+  namespace: loki
+  labels:
+    loki.grafana.com/rules: "true"
+spec:
+  groups:
+    - name: log-volume-by-namespace
+      interval: 1m
+      rules:
+        - record: namespace:log_lines_total:1m
+          expr: sum by (namespace) (count_over_time({namespace=~".+"} [1m]))
+        - record: namespace:log_errors_total:1m
+          expr: sum by (namespace) (count_over_time({namespace=~".+", level=~"ERROR|FATAL"} [1m]))

@@ -1,0 +1,23 @@
+# Alloy の mimir.rules.kubernetes / loki.rules.kubernetes が PrometheusRule リソースを参照するため、
+# PrometheusRule CRD をインストールする。
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheusrule-crd
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/prometheus-operator/prometheus-operator
+    targetRevision: main
+    path: example/prometheus-operator-crd
+    directory:
+      include: 'monitoring.coreos.com_prometheusrules.yaml'
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+    syncOptions:
+      - CreateNamespace=false
+      - ServerSideApply=true

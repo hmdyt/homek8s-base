@@ -26,6 +26,10 @@ spec:
                   path: /proc
         rbac:
           create: true
+          extraClusterRoleRules:
+            - apiGroups: ["monitoring.coreos.com"]
+              resources: ["prometheusrules"]
+              verbs: ["get", "list", "watch"]
         alloy:
           mounts:
             varlog: true
@@ -249,6 +253,19 @@ spec:
                 }
                 external_labels = {
                   cluster = "homek8s-base",
+                }
+              }
+
+              mimir.rules.kubernetes "mimir" {
+                address = "http://mimir-nginx.mimir.svc:80"
+              }
+
+              loki.rules.kubernetes "loki" {
+                address = "http://loki-gateway.loki.svc:80"
+                rule_selector {
+                  match_labels = {
+                    "loki.grafana.com/rules" = "true",
+                  }
                 }
               }
   destination:

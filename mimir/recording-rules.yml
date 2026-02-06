@@ -1,0 +1,58 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kubernetes-recording-rules
+  namespace: mimir
+spec:
+  groups:
+    - name: kubernetes.rules.container_cpu
+      interval: 30s
+      rules:
+        - record: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate
+          expr: |-
+            sum by (cluster, namespace, pod, container) (
+              irate(container_cpu_usage_seconds_total{job="kubelet-cadvisor", image!=""}[5m])
+            ) * on (cluster, namespace, pod) group_left(node)
+              topk by (cluster, namespace, pod) (1,
+                max by (cluster, namespace, pod, node) (kube_pod_info{node!=""})
+              )
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: seaweedfs-percentiles
+  namespace: mimir
+spec:
+  groups:
+    - name: seaweedfs_percentiles
+      interval: 1m
+      rules:
+        - record: seaweedfs:filer_request_duration:p90
+          expr: histogram_quantile(0.90, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le))
+        - record: seaweedfs:filer_request_duration:p95
+          expr: histogram_quantile(0.95, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le))
+        - record: seaweedfs:filer_request_duration:p99
+          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le))
+        - record: seaweedfs:filer_request_duration_by_type:p90
+          expr: histogram_quantile(0.90, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le, type))
+        - record: seaweedfs:filer_request_duration_by_type:p95
+          expr: histogram_quantile(0.95, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le, type))
+        - record: seaweedfs:filer_request_duration_by_type:p99
+          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le, type))
+        - record: seaweedfs:s3_request_duration:p50
+          expr: histogram_quantile(0.50, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le))
+        - record: seaweedfs:s3_request_duration:p95
+          expr: histogram_quantile(0.95, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le))
+        - record: seaweedfs:s3_request_duration:p99
+          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le))
+        - record: seaweedfs:s3_request_duration_by_type_bucket:p50
+          expr: histogram_quantile(0.50, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le, type, bucket))
+        - record: seaweedfs:s3_request_duration_by_type_bucket:p95
+          expr: histogram_quantile(0.95, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le, type, bucket))
+        - record: seaweedfs:s3_request_duration_by_type_bucket:p99
+          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le, type, bucket))
+        - record: seaweedfs:volume_request_duration:p99
+          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_volumeServer_request_seconds_bucket[5m])) by (le))
+        - record: seaweedfs:volume_request_duration_by_instance:p99
+          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_volumeServer_request_seconds_bucket[5m])) by (le, exported_instance))
