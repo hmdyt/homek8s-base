@@ -115,14 +115,14 @@ spec:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "seaweedfs:filer_request_duration:p90{cluster=\"$cluster\"}",
+                  "expr": "histogram_quantile(0.90, sum(rate(SeaweedFS_filerStore_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le))",
                   "format": "time_series",
                   "hide": false,
                   "legendFormat": "average",
                   "refId": "A"
                 },
                 {
-                  "expr": "seaweedfs:filer_request_duration_by_type:p90{cluster=\"$cluster\"}",
+                  "expr": "histogram_quantile(0.90, sum(rate(SeaweedFS_filerStore_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le, type))",
                   "format": "time_series",
                   "hide": false,
                   "legendFormat": "{{type}}",
@@ -206,14 +206,14 @@ spec:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "seaweedfs:filer_request_duration:p95{cluster=\"$cluster\"}",
+                  "expr": "histogram_quantile(0.95, sum(rate(SeaweedFS_filerStore_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le))",
                   "format": "time_series",
                   "hide": false,
                   "legendFormat": "average",
                   "refId": "A"
                 },
                 {
-                  "expr": "seaweedfs:filer_request_duration_by_type:p95{cluster=\"$cluster\"}",
+                  "expr": "histogram_quantile(0.95, sum(rate(SeaweedFS_filerStore_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le, type))",
                   "format": "time_series",
                   "hide": false,
                   "legendFormat": "{{type}}",
@@ -302,14 +302,14 @@ spec:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "seaweedfs:filer_request_duration:p99{cluster=\"$cluster\"}",
+                  "expr": "histogram_quantile(0.99, sum(rate(SeaweedFS_filerStore_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le))",
                   "format": "time_series",
                   "hide": false,
                   "legendFormat": "average",
                   "refId": "A"
                 },
                 {
-                  "expr": "seaweedfs:filer_request_duration_by_type:p99{cluster=\"$cluster\"}",
+                  "expr": "histogram_quantile(0.99, sum(rate(SeaweedFS_filerStore_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le, type))",
                   "format": "time_series",
                   "hide": false,
                   "legendFormat": "{{type}}",
@@ -845,14 +845,14 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "seaweedfs:s3_request_duration:p50{cluster=\"$cluster\"}",
+              "expr": "histogram_quantile(0.50, sum(rate(SeaweedFS_s3_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le))",
               "format": "time_series",
               "hide": false,
               "legendFormat": "average",
               "refId": "A"
             },
             {
-              "expr": "seaweedfs:s3_request_duration_by_type_bucket:p50{cluster=\"$cluster\"}",
+              "expr": "histogram_quantile(0.50, sum(rate(SeaweedFS_s3_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le, type, bucket))",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -948,14 +948,14 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "seaweedfs:s3_request_duration:p95{cluster=\"$cluster\"}",
+              "expr": "histogram_quantile(0.95, sum(rate(SeaweedFS_s3_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le))",
               "format": "time_series",
               "hide": false,
               "legendFormat": "average",
               "refId": "A"
             },
             {
-              "expr": "seaweedfs:s3_request_duration_by_type_bucket:p95{cluster=\"$cluster\"}",
+              "expr": "histogram_quantile(0.95, sum(rate(SeaweedFS_s3_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le, type, bucket))",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1051,14 +1051,14 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "seaweedfs:s3_request_duration:p99{cluster=\"$cluster\"}",
+              "expr": "histogram_quantile(0.99, sum(rate(SeaweedFS_s3_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le))",
               "format": "time_series",
               "hide": false,
               "legendFormat": "average",
               "refId": "A"
             },
             {
-              "expr": "seaweedfs:s3_request_duration_by_type_bucket:p99{cluster=\"$cluster\"}",
+              "expr": "histogram_quantile(0.99, sum(rate(SeaweedFS_s3_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le, type, bucket))",
               "format": "time_series",
               "hide": false,
               "legendFormat": "{{bucket}} {{type}}",
@@ -1694,14 +1694,14 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "seaweedfs:volume_request_duration_by_instance:p99{cluster=\"$cluster\"}",
+              "expr": "histogram_quantile(0.99, sum(rate(SeaweedFS_volumeServer_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le, exported_instance))",
               "format": "time_series",
               "hide": false,
               "legendFormat": "{{exported_instance}}",
               "refId": "B"
             },
             {
-              "expr": "seaweedfs:volume_request_duration:p99{cluster=\"$cluster\"}",
+              "expr": "histogram_quantile(0.99, sum(rate(SeaweedFS_volumeServer_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le))",
               "format": "time_series",
               "legendFormat": "average",
               "refId": "C"
@@ -2200,7 +2200,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "seaweedfs:filer_request_duration_by_type:p99{cluster=\"$cluster\"}",
+              "expr": "histogram_quantile(0.99, sum(rate(SeaweedFS_filerStore_request_seconds_bucket{cluster=\"$cluster\"}[$__rate_interval])) by (le, type))",
               "format": "time_series",
               "legendFormat": "{{type}}",
               "refId": "B"
