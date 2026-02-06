@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudflare-tunnel-ingress-controller
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://strrl.dev/cloudflare-tunnel-ingress-controller
+      chart: cloudflare-tunnel-ingress-controller
+      targetRevision: 0.0.13
+      helm:
+        valuesObject:
+          cloudflare:
+            secretRef:
+              name: cloudflare-tunnel-credentials
+              accountIdKey: accountId
+              apiTokenKey: apiToken
+              tunnelNameKey: tunnelName
+          ingressClass:
+            name: cloudflare-tunnel
+            isDefaultClass: false
+          replicaCount: 1
+          cloudflaredServiceMonitor:
+            create: true
+    - repoURL: https://github.com/hmdyt/homek8s-base.git
+      targetRevision: HEAD
+      path: cloudflare-tunnel
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudflare-tunnel-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
