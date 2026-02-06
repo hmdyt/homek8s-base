@@ -1,0 +1,249 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alloy
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://grafana.github.io/helm-charts
+    chart: alloy
+    targetRevision: "0.11.0"
+    helm:
+      valuesObject:
+        controller:
+          type: daemonset
+          volumes:
+            extra:
+              - name: rootfs
+                hostPath:
+                  path: /
+              - name: sysfs
+                hostPath:
+                  path: /sys
+              - name: procfs
+                hostPath:
+                  path: /proc
+        rbac:
+          create: true
+        alloy:
+          mounts:
+            varlog: true
+            dockercontainers: true
+            extra:
+              - name: rootfs
+                mountPath: /host/root
+                readOnly: true
+              - name: sysfs
+                mountPath: /host/sys
+                readOnly: true
+              - name: procfs
+                mountPath: /host/proc
+                readOnly: true
+          configMap:
+            content: |
+              // =============================================================================
+              // Node Exporter
+              // =============================================================================
+              prometheus.exporter.unix "node" {
+                set_collectors = ["cpu", "diskstats", "filesystem", "loadavg", "meminfo", "netdev", "stat", "uname"]
+                rootfs_path = "/host/root"
+                sysfs_path = "/host/sys"
+                procfs_path = "/host/proc"
+                filesystem {
+                  fs_types_exclude = "^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$"
+                  mount_points_exclude = "^/(host/root/)?(dev|proc|run/credentials/.+|sys|var/lib/docker/.+|var/lib/kubelet/.+)($|/)"
+                }
+              }
+
+              prometheus.scrape "node" {
+                targets = prometheus.exporter.unix.node.targets
+                forward_to = [prometheus.relabel.node.receiver]
+                job_name = "node-exporter"
+                scrape_interval = "30s"
+              }
+
+              prometheus.relabel "node" {
+                forward_to = [prometheus.remote_write.mimir.receiver]
+                rule {
+                  source_labels = ["__address__"]
+                  target_label = "node"
+                  replacement = env("HOSTNAME")
+                }
+                rule {
+                  target_label = "nodename"
+                  replacement = env("HOSTNAME")
+                }
+              }
+
+              // =============================================================================
+              // Kubelet Metrics
+              // =============================================================================
+              discovery.kubernetes "nodes" {
+                role = "node"
+              }
+
+              discovery.relabel "kubelet" {
+                targets = discovery.kubernetes.nodes.targets
+                rule {
+                  source_labels = ["__meta_kubernetes_node_name"]
+                  regex = env("HOSTNAME")
+                  action = "keep"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_node_name"]
+                  target_label = "__address__"
+                  replacement = "$1:10250"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_node_name"]
+                  target_label = "node"
+                }
+              }
+
+              prometheus.scrape "kubelet" {
+                targets = discovery.relabel.kubelet.output
+                forward_to = [prometheus.remote_write.mimir.receiver]
+                job_name = "kubelet"
+                scrape_interval = "30s"
+                scheme = "https"
+                bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                tls_config {
+                  ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                  insecure_skip_verify = true
+                }
+              }
+
+              // =============================================================================
+              // cAdvisor Metrics
+              // =============================================================================
+              prometheus.scrape "cadvisor" {
+                targets = discovery.relabel.kubelet.output
+                forward_to = [prometheus.remote_write.mimir.receiver]
+                job_name = "kubelet-cadvisor"
+                scrape_interval = "30s"
+                scheme = "https"
+                metrics_path = "/metrics/cadvisor"
+                bearer_token_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+                tls_config {
+                  ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                  insecure_skip_verify = true
+                }
+              }
+
+              // =============================================================================
+              // SeaweedFS Metrics
+              // =============================================================================
+              prometheus.scrape "seaweedfs_master" {
+                targets = [{"__address__" = "seaweedfs-master.seaweedfs.svc:9324"}]
+                forward_to = [prometheus.remote_write.mimir.receiver]
+                job_name = "seaweedfs-master"
+                scrape_interval = "30s"
+              }
+
+              prometheus.scrape "seaweedfs_volume" {
+                targets = [{"__address__" = "seaweedfs-volume-0.seaweedfs.svc:9325"}]
+                forward_to = [prometheus.remote_write.mimir.receiver]
+                job_name = "seaweedfs-volume"
+                scrape_interval = "30s"
+              }
+
+              prometheus.scrape "seaweedfs_filer" {
+                targets = [{"__address__" = "seaweedfs-filer.seaweedfs.svc:9326"}]
+                forward_to = [prometheus.remote_write.mimir.receiver]
+                job_name = "seaweedfs-filer"
+                scrape_interval = "30s"
+              }
+
+              // =============================================================================
+              // Prometheus Remote Write (Mimir)
+              // =============================================================================
+              prometheus.remote_write "mimir" {
+                endpoint {
+                  url = "http://mimir-nginx.mimir.svc:80/api/v1/push"
+                }
+                external_labels = {
+                  cluster = "homek8s-base",
+                  source = "alloy",
+                }
+              }
+
+              // =============================================================================
+              // Kubernetes Pod Logs
+              // =============================================================================
+              discovery.kubernetes "pods" {
+                role = "pod"
+                selectors {
+                  role = "pod"
+                  field = "spec.nodeName=" + coalesce(sys.env("HOSTNAME"), constants.hostname)
+                }
+              }
+
+              discovery.relabel "pod_logs" {
+                targets = discovery.kubernetes.pods.targets
+                rule {
+                  source_labels = ["__meta_kubernetes_namespace"]
+                  target_label  = "namespace"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_name"]
+                  target_label  = "pod"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_container_name"]
+                  target_label  = "container"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_name"]
+                  regex         = "(alloy|loki).*"
+                  action        = "drop"
+                }
+              }
+
+              loki.source.kubernetes "pod_logs" {
+                targets    = discovery.relabel.pod_logs.output
+                forward_to = [loki.process.parse_logs.receiver]
+              }
+
+              loki.process "parse_logs" {
+                forward_to = [loki.write.local.receiver]
+
+                stage.regex {
+                  expression = "(?i)(?:level|lvl|severity)[=:][ \\t]*\"?(?P<level>debug|info|warn|warning|error|fatal|critical|panic)\"?"
+                }
+
+                stage.regex {
+                  expression = "^(?P<klog_level>[EIWF])[0-9]{4}"
+                }
+
+                stage.template {
+                  source   = "level"
+                  template = "{{`{{ if .klog_level }}{{ if eq .klog_level \"I\" }}INFO{{ else if eq .klog_level \"W\" }}WARN{{ else if eq .klog_level \"E\" }}ERROR{{ else if eq .klog_level \"F\" }}FATAL{{ end }}{{ else if .level }}{{ .level | upper }}{{ end }}`}}"
+                }
+
+                stage.labels {
+                  values = { level = "" }
+                }
+
+                stage.label_drop {
+                  values = ["klog_level"]
+                }
+              }
+
+              // =============================================================================
+              // Loki Write
+              // =============================================================================
+              loki.write "local" {
+                endpoint {
+                  url = "http://loki-gateway.loki.svc:80/loki/api/v1/push"
+                }
+              }
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: alloy
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
