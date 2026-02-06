@@ -23,6 +23,8 @@ spec:
                 region: us-east-1
                 forcepathstyle: true
                 insecure: true
+                access_key: dummy
+                secret_key: dummy
               wal:
                 path: /var/tempo/wal
           receivers:
