@@ -237,6 +237,9 @@ spec:
                 endpoint {
                   url = "http://loki-gateway.loki.svc:80/loki/api/v1/push"
                 }
+                external_labels = {
+                  cluster = "homek8s-base",
+                }
               }
   destination:
     server: https://kubernetes.default.svc
