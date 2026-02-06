@@ -163,7 +163,15 @@ spec:
               memory: 64Mi
         nginx:
           service:
-            type: LoadBalancer
+            type: ClusterIP
+          ingress:
+            enabled: true
+            ingressClassName: traefik
+            hosts:
+              - host: mimir.homek8s-base.local
+                paths:
+                  - path: /
+                    pathType: Prefix
           replicas: 1
           resources:
             requests:

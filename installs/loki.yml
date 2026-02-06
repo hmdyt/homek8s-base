@@ -57,7 +57,15 @@ spec:
           enabled: true
           replicas: 1
           service:
-            type: LoadBalancer
+            type: ClusterIP
+          ingress:
+            enabled: true
+            ingressClassName: traefik
+            hosts:
+              - host: loki.homek8s-base.local
+                paths:
+                  - path: /
+                    pathType: Prefix
         chunksCache:
           enabled: false
         resultsCache:
