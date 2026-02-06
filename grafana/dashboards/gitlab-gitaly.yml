@@ -371,7 +371,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "rate(gitaly_command_cpu_seconds_total{cluster=\"homek8s\"}[5m])",
+              "expr": "rate(gitaly_command_cpu_seconds_total{cluster=\"homek8s\"}[$__rate_interval])",
               "legendFormat": "cpu",
               "refId": "A"
             }
@@ -459,7 +459,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "rate(gitaly_command_real_seconds_total{cluster=\"homek8s\"}[5m])",
+              "expr": "rate(gitaly_command_real_seconds_total{cluster=\"homek8s\"}[$__rate_interval])",
               "legendFormat": "real time",
               "refId": "A"
             }
@@ -547,7 +547,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum(rate(gitaly_diskcache_requests_total{cluster=\"homek8s\"}[5m]))",
+              "expr": "sum(rate(gitaly_diskcache_requests_total{cluster=\"homek8s\"}[$__rate_interval]))",
               "legendFormat": "requests",
               "refId": "A"
             },
@@ -556,7 +556,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum(rate(gitaly_diskcache_miss_total{cluster=\"homek8s\"}[5m]))",
+              "expr": "sum(rate(gitaly_diskcache_miss_total{cluster=\"homek8s\"}[$__rate_interval]))",
               "legendFormat": "miss",
               "refId": "B"
             }
@@ -644,7 +644,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum(rate(gitaly_authentications_total{cluster=\"homek8s\"}[5m])) by (status)",
+              "expr": "sum(rate(gitaly_authentications_total{cluster=\"homek8s\"}[$__rate_interval])) by (status)",
               "legendFormat": "{{status}}",
               "refId": "A"
             }
@@ -732,7 +732,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum(rate(gitaly_housekeeping_tasks_total{cluster=\"homek8s\"}[5m])) by (housekeeping_task, status)",
+              "expr": "sum(rate(gitaly_housekeeping_tasks_total{cluster=\"homek8s\"}[$__rate_interval])) by (housekeeping_task, status)",
               "legendFormat": "{{housekeeping_task}} - {{status}}",
               "refId": "A"
             }

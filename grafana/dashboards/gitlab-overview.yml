@@ -98,7 +98,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "histogram_quantile(0.95, sum(rate(gitlab_rails_queue_duration_seconds_bucket{cluster=\"homek8s\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(rate(gitlab_rails_queue_duration_seconds_bucket{cluster=\"homek8s\"}[$__rate_interval])) by (le))",
               "legendFormat": "p95",
               "refId": "A"
             },
@@ -107,7 +107,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "histogram_quantile(0.50, sum(rate(gitlab_rails_queue_duration_seconds_bucket{cluster=\"homek8s\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.50, sum(rate(gitlab_rails_queue_duration_seconds_bucket{cluster=\"homek8s\"}[$__rate_interval])) by (le))",
               "legendFormat": "p50",
               "refId": "B"
             }
@@ -301,7 +301,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum(rate(gitlab_cache_operations_total{cluster=\"homek8s\"}[5m])) by (operation)",
+              "expr": "sum(rate(gitlab_cache_operations_total{cluster=\"homek8s\"}[$__rate_interval])) by (operation)",
               "legendFormat": "{{operation}}",
               "refId": "A"
             }
@@ -389,7 +389,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum(rate(gitlab_ci_runner_authentication_success_total{cluster=\"homek8s\"}[5m]))",
+              "expr": "sum(rate(gitlab_ci_runner_authentication_success_total{cluster=\"homek8s\"}[$__rate_interval]))",
               "legendFormat": "auth success",
               "refId": "A"
             }
@@ -477,7 +477,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "histogram_quantile(0.95, sum(rate(gitlab_redis_client_requests_duration_seconds_bucket{cluster=\"homek8s\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(rate(gitlab_redis_client_requests_duration_seconds_bucket{cluster=\"homek8s\"}[$__rate_interval])) by (le))",
               "legendFormat": "p95",
               "refId": "A"
             },
@@ -486,7 +486,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "histogram_quantile(0.50, sum(rate(gitlab_redis_client_requests_duration_seconds_bucket{cluster=\"homek8s\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.50, sum(rate(gitlab_redis_client_requests_duration_seconds_bucket{cluster=\"homek8s\"}[$__rate_interval])) by (le))",
               "legendFormat": "p50",
               "refId": "B"
             }
@@ -574,7 +574,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum(rate(gitlab_redis_client_requests_total{cluster=\"homek8s\"}[5m])) by (storage)",
+              "expr": "sum(rate(gitlab_redis_client_requests_total{cluster=\"homek8s\"}[$__rate_interval])) by (storage)",
               "legendFormat": "{{storage}}",
               "refId": "A"
             }
@@ -759,7 +759,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum(rate(sidekiq_jobs_processed_total{cluster=\"homek8s\"}[5m]))",
+              "expr": "sum(rate(sidekiq_jobs_processed_total{cluster=\"homek8s\"}[$__rate_interval]))",
               "legendFormat": "processed",
               "refId": "A"
             },
@@ -768,7 +768,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum(rate(sidekiq_jobs_failed_total{cluster=\"homek8s\"}[5m]))",
+              "expr": "sum(rate(sidekiq_jobs_failed_total{cluster=\"homek8s\"}[$__rate_interval]))",
               "legendFormat": "failed",
               "refId": "B"
             }

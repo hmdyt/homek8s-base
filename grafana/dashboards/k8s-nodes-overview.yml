@@ -110,7 +110,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "100 - (avg by (node) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+              "expr": "100 - (avg by (node) (rate(node_cpu_seconds_total{mode=\"idle\"}[$__rate_interval])) * 100)",
               "legendFormat": "{{node}}",
               "refId": "A"
             }
@@ -490,7 +490,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum by (node) (rate(node_network_receive_bytes_total{device!~\"lo|veth.*|cali.*|flannel.*\"}[5m]))",
+              "expr": "sum by (node) (rate(node_network_receive_bytes_total{device!~\"lo|veth.*|cali.*|flannel.*\"}[$__rate_interval]))",
               "legendFormat": "{{node}} rx",
               "refId": "A"
             },
@@ -499,7 +499,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum by (node) (rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|cali.*|flannel.*\"}[5m]))",
+              "expr": "sum by (node) (rate(node_network_transmit_bytes_total{device!~\"lo|veth.*|cali.*|flannel.*\"}[$__rate_interval]))",
               "legendFormat": "{{node}} tx",
               "refId": "B"
             }
@@ -589,7 +589,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum by (node) (rate(node_disk_read_bytes_total[5m]))",
+              "expr": "sum by (node) (rate(node_disk_read_bytes_total[$__rate_interval]))",
               "legendFormat": "{{node}} read",
               "refId": "A"
             },
@@ -598,7 +598,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum by (node) (rate(node_disk_written_bytes_total[5m]))",
+              "expr": "sum by (node) (rate(node_disk_written_bytes_total[$__rate_interval]))",
               "legendFormat": "{{node}} write",
               "refId": "B"
             }
@@ -736,7 +736,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "100 - (avg by (node) (rate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+              "expr": "100 - (avg by (node) (rate(node_cpu_seconds_total{mode=\"idle\"}[$__rate_interval])) * 100)",
               "legendFormat": "{{node}}",
               "refId": "A"
             }

@@ -98,7 +98,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "histogram_quantile(0.95, sum(rate(http_server_duration_bucket{job=~\"immich.*\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(rate(http_server_duration_bucket{job=~\"immich.*\"}[$__rate_interval])) by (le))",
               "legendFormat": "p95",
               "refId": "A"
             },
@@ -107,7 +107,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "histogram_quantile(0.50, sum(rate(http_server_duration_bucket{job=~\"immich.*\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.50, sum(rate(http_server_duration_bucket{job=~\"immich.*\"}[$__rate_interval])) by (le))",
               "legendFormat": "p50",
               "refId": "B"
             }
@@ -195,7 +195,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum(rate(http_server_duration_count{job=~\"immich.*\"}[5m])) by (http_method)",
+              "expr": "sum(rate(http_server_duration_count{job=~\"immich.*\"}[$__rate_interval])) by (http_method)",
               "legendFormat": "{{http_method}}",
               "refId": "A"
             }
@@ -283,7 +283,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "sum(rate(http_server_duration_count{job=~\"immich.*\"}[5m])) by (http_status_code)",
+              "expr": "sum(rate(http_server_duration_count{job=~\"immich.*\"}[$__rate_interval])) by (http_status_code)",
               "legendFormat": "{{http_status_code}}",
               "refId": "A"
             }
@@ -371,7 +371,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "histogram_quantile(0.95, sum(rate(http_client_duration_bucket{job=~\"immich.*\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(rate(http_client_duration_bucket{job=~\"immich.*\"}[$__rate_interval])) by (le))",
               "legendFormat": "p95",
               "refId": "A"
             },
@@ -380,7 +380,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "histogram_quantile(0.50, sum(rate(http_client_duration_bucket{job=~\"immich.*\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.50, sum(rate(http_client_duration_bucket{job=~\"immich.*\"}[$__rate_interval])) by (le))",
               "legendFormat": "p50",
               "refId": "B"
             }
@@ -468,7 +468,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "histogram_quantile(0.95, sum(rate(immich_job_repository_queue_duration_bucket{job=~\"immich.*\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(rate(immich_job_repository_queue_duration_bucket{job=~\"immich.*\"}[$__rate_interval])) by (le))",
               "legendFormat": "job queue p95",
               "refId": "A"
             },
@@ -477,7 +477,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "histogram_quantile(0.95, sum(rate(immich_database_repository_with_lock_duration_bucket{job=~\"immich.*\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(rate(immich_database_repository_with_lock_duration_bucket{job=~\"immich.*\"}[$__rate_interval])) by (le))",
               "legendFormat": "db lock p95",
               "refId": "B"
             },
@@ -486,7 +486,7 @@ spec:
                 "type": "prometheus",
                 "uid": "mimir"
               },
-              "expr": "histogram_quantile(0.95, sum(rate(immich_event_repository_emit_duration_bucket{job=~\"immich.*\"}[5m])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(rate(immich_event_repository_emit_duration_bucket{job=~\"immich.*\"}[$__rate_interval])) by (le))",
               "legendFormat": "event emit p95",
               "refId": "C"
             }
