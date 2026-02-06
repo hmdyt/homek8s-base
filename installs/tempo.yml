@@ -35,7 +35,15 @@ spec:
                 http:
                   endpoint: "0.0.0.0:4318"
         service:
-          type: LoadBalancer
+          type: ClusterIP
+        ingress:
+          enabled: true
+          ingressClassName: traefik
+          hosts:
+            - host: tempo.homek8s-base.local
+              paths:
+                - path: /
+                  pathType: Prefix
         persistence:
           enabled: false
         serviceMonitor:
