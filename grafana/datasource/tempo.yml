@@ -15,6 +15,7 @@ spec:
     url: http://tempo.tempo.svc:3100
     isDefault: false
     jsonData:
+      timeout: "60"
       tracesToLogsV2:
         datasourceUid: loki
       nodeGraph:

@@ -16,3 +16,4 @@ spec:
     isDefault: false
     jsonData:
       httpMethod: POST
+      timeout: "60"

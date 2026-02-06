@@ -17,3 +17,4 @@ spec:
     jsonData:
       timeInterval: "30s"
       httpMethod: POST
+      timeout: "60"

@@ -50,6 +50,8 @@ spec:
               compactor_blocks_retention_period: 30d
               ingestion_rate: 30000
               ingestion_burst_size: 300000
+              max_query_parallelism: 32
+              max_fetched_series_per_query: 10000
             multitenancy_enabled: false
             ingester:
               ring:
