@@ -14,7 +14,7 @@ spec:
           cloudflare:
             secretRef:
               name: cloudflare-tunnel-credentials
-              accountIdKey: accountId
+              accountIDKey: accountId
               apiTokenKey: apiToken
               tunnelNameKey: tunnelName
           ingressClass:
