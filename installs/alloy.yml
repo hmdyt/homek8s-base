@@ -156,6 +156,16 @@ spec:
               }
 
               // =============================================================================
+              // kube-state-metrics
+              // =============================================================================
+              prometheus.scrape "kube_state_metrics" {
+                targets = [{"__address__" = "kube-state-metrics.kube-state-metrics.svc:8080"}]
+                forward_to = [prometheus.remote_write.mimir.receiver]
+                job_name = "kube-state-metrics"
+                scrape_interval = "30s"
+              }
+
+              // =============================================================================
               // Prometheus Remote Write (Mimir)
               // =============================================================================
               prometheus.remote_write "mimir" {
