@@ -1,0 +1,15 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: mysql-overview
+  namespace: observability
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  grafanaCom:
+    id: 7362
+    revision: 5
+  datasources:
+    - inputName: DS_PROMETHEUS
+      datasourceName: Mimir
