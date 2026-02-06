@@ -115,7 +115,7 @@ spec:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "seaweedfs:filer_request_duration:p90",
+                  "expr": "seaweedfs:filer_request_duration:p90{cluster=\"$cluster\"}",
                   "format": "time_series",
                   "hide": false,
                   "intervalFactor": 2,
@@ -123,7 +123,7 @@ spec:
                   "refId": "A"
                 },
                 {
-                  "expr": "seaweedfs:filer_request_duration_by_type:p90",
+                  "expr": "seaweedfs:filer_request_duration_by_type:p90{cluster=\"$cluster\"}",
                   "format": "time_series",
                   "hide": false,
                   "intervalFactor": 2,
@@ -208,7 +208,7 @@ spec:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "seaweedfs:filer_request_duration:p95",
+                  "expr": "seaweedfs:filer_request_duration:p95{cluster=\"$cluster\"}",
                   "format": "time_series",
                   "hide": false,
                   "intervalFactor": 2,
@@ -216,7 +216,7 @@ spec:
                   "refId": "A"
                 },
                 {
-                  "expr": "seaweedfs:filer_request_duration_by_type:p95",
+                  "expr": "seaweedfs:filer_request_duration_by_type:p95{cluster=\"$cluster\"}",
                   "format": "time_series",
                   "hide": false,
                   "intervalFactor": 2,
@@ -307,7 +307,7 @@ spec:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "seaweedfs:filer_request_duration:p99",
+                  "expr": "seaweedfs:filer_request_duration:p99{cluster=\"$cluster\"}",
                   "format": "time_series",
                   "hide": false,
                   "intervalFactor": 2,
@@ -315,7 +315,7 @@ spec:
                   "refId": "A"
                 },
                 {
-                  "expr": "seaweedfs:filer_request_duration_by_type:p99",
+                  "expr": "seaweedfs:filer_request_duration_by_type:p99{cluster=\"$cluster\"}",
                   "format": "time_series",
                   "hide": false,
                   "intervalFactor": 2,
@@ -858,7 +858,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "seaweedfs:s3_request_duration:p50",
+              "expr": "seaweedfs:s3_request_duration:p50{cluster=\"$cluster\"}",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -866,7 +866,7 @@ spec:
               "refId": "A"
             },
             {
-              "expr": "seaweedfs:s3_request_duration_by_type_bucket:p50",
+              "expr": "seaweedfs:s3_request_duration_by_type_bucket:p50{cluster=\"$cluster\"}",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -963,7 +963,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "seaweedfs:s3_request_duration:p95",
+              "expr": "seaweedfs:s3_request_duration:p95{cluster=\"$cluster\"}",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -971,7 +971,7 @@ spec:
               "refId": "A"
             },
             {
-              "expr": "seaweedfs:s3_request_duration_by_type_bucket:p95",
+              "expr": "seaweedfs:s3_request_duration_by_type_bucket:p95{cluster=\"$cluster\"}",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1068,7 +1068,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "seaweedfs:s3_request_duration:p99",
+              "expr": "seaweedfs:s3_request_duration:p99{cluster=\"$cluster\"}",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -1076,7 +1076,7 @@ spec:
               "refId": "A"
             },
             {
-              "expr": "seaweedfs:s3_request_duration_by_type_bucket:p99",
+              "expr": "seaweedfs:s3_request_duration_by_type_bucket:p99{cluster=\"$cluster\"}",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -1721,7 +1721,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "seaweedfs:volume_request_duration_by_instance:p99",
+              "expr": "seaweedfs:volume_request_duration_by_instance:p99{cluster=\"$cluster\"}",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -1729,7 +1729,7 @@ spec:
               "refId": "B"
             },
             {
-              "expr": "seaweedfs:volume_request_duration:p99",
+              "expr": "seaweedfs:volume_request_duration:p99{cluster=\"$cluster\"}",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "average",
@@ -2235,7 +2235,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "seaweedfs:filer_request_duration_by_type:p99",
+              "expr": "seaweedfs:filer_request_duration_by_type:p99{cluster=\"$cluster\"}",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",

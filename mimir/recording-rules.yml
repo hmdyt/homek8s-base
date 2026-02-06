@@ -29,30 +29,30 @@ spec:
       interval: 1m
       rules:
         - record: seaweedfs:filer_request_duration:p90
-          expr: histogram_quantile(0.90, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le))
+          expr: histogram_quantile(0.90, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le, cluster))
         - record: seaweedfs:filer_request_duration:p95
-          expr: histogram_quantile(0.95, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le))
+          expr: histogram_quantile(0.95, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le, cluster))
         - record: seaweedfs:filer_request_duration:p99
-          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le))
+          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le, cluster))
         - record: seaweedfs:filer_request_duration_by_type:p90
-          expr: histogram_quantile(0.90, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le, type))
+          expr: histogram_quantile(0.90, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le, cluster, type))
         - record: seaweedfs:filer_request_duration_by_type:p95
-          expr: histogram_quantile(0.95, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le, type))
+          expr: histogram_quantile(0.95, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le, cluster, type))
         - record: seaweedfs:filer_request_duration_by_type:p99
-          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le, type))
+          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_filerStore_request_seconds_bucket[5m])) by (le, cluster, type))
         - record: seaweedfs:s3_request_duration:p50
-          expr: histogram_quantile(0.50, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le))
+          expr: histogram_quantile(0.50, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le, cluster))
         - record: seaweedfs:s3_request_duration:p95
-          expr: histogram_quantile(0.95, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le))
+          expr: histogram_quantile(0.95, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le, cluster))
         - record: seaweedfs:s3_request_duration:p99
-          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le))
+          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le, cluster))
         - record: seaweedfs:s3_request_duration_by_type_bucket:p50
-          expr: histogram_quantile(0.50, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le, type, bucket))
+          expr: histogram_quantile(0.50, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le, cluster, type, bucket))
         - record: seaweedfs:s3_request_duration_by_type_bucket:p95
-          expr: histogram_quantile(0.95, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le, type, bucket))
+          expr: histogram_quantile(0.95, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le, cluster, type, bucket))
         - record: seaweedfs:s3_request_duration_by_type_bucket:p99
-          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le, type, bucket))
+          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_s3_request_seconds_bucket[5m])) by (le, cluster, type, bucket))
         - record: seaweedfs:volume_request_duration:p99
-          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_volumeServer_request_seconds_bucket[5m])) by (le))
+          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_volumeServer_request_seconds_bucket[5m])) by (le, cluster))
         - record: seaweedfs:volume_request_duration_by_instance:p99
-          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_volumeServer_request_seconds_bucket[5m])) by (le, exported_instance))
+          expr: histogram_quantile(0.99, sum(rate(SeaweedFS_volumeServer_request_seconds_bucket[5m])) by (le, cluster, exported_instance))
