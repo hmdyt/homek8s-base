@@ -419,7 +419,7 @@ spec:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "rate(SeaweedFS_filerStore_request_total[$__rate_interval])",
+                  "expr": "rate(SeaweedFS_filerStore_request_total{cluster=\"$cluster\"}[$__rate_interval])",
                   "format": "time_series",
                   "intervalFactor": 2,
                   "legendFormat": "{{type}}",
@@ -500,7 +500,7 @@ spec:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "SeaweedFS_filer_in_flight_upload_count",
+                  "expr": "SeaweedFS_filer_in_flight_upload_count{cluster=\"$cluster\"}",
                   "format": "time_series",
                   "intervalFactor": 2,
                   "legendFormat": "uploads",
@@ -581,7 +581,7 @@ spec:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "SeaweedFS_filer_in_flight_upload_bytes",
+                  "expr": "SeaweedFS_filer_in_flight_upload_bytes{cluster=\"$cluster\"}",
                   "format": "time_series",
                   "intervalFactor": 2,
                   "legendFormat": "bytes",
@@ -682,7 +682,7 @@ spec:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "SeaweedFS_s3_in_flight_upload_count",
+                  "expr": "SeaweedFS_s3_in_flight_upload_count{cluster=\"$cluster\"}",
                   "format": "time_series",
                   "intervalFactor": 2,
                   "legendFormat": "uploads",
@@ -763,7 +763,7 @@ spec:
               "steppedLine": false,
               "targets": [
                 {
-                  "expr": "SeaweedFS_s3_in_flight_upload_bytes",
+                  "expr": "SeaweedFS_s3_in_flight_upload_bytes{cluster=\"$cluster\"}",
                   "format": "time_series",
                   "intervalFactor": 2,
                   "legendFormat": "bytes",
@@ -1175,7 +1175,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(SeaweedFS_s3_bucket_traffic_received_bytes_total[$__interval])) by (bucket)",
+              "expr": "sum(rate(SeaweedFS_s3_bucket_traffic_received_bytes_total{cluster=\"$cluster\"}[$__interval])) by (bucket)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -1268,7 +1268,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(SeaweedFS_s3_bucket_traffic_sent_bytes_total[$__interval])) by (bucket)",
+              "expr": "sum(rate(SeaweedFS_s3_bucket_traffic_sent_bytes_total{cluster=\"$cluster\"}[$__interval])) by (bucket)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -1361,7 +1361,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(SeaweedFS_s3_request_total[$__interval])) by (bucket)",
+              "expr": "sum(rate(SeaweedFS_s3_request_total{cluster=\"$cluster\"}[$__interval])) by (bucket)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -1464,7 +1464,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(SeaweedFS_s3_request_total[$__rate_interval])",
+              "expr": "rate(SeaweedFS_s3_request_total{cluster=\"$cluster\"}[$__rate_interval])",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{bucket}} {{type}}",
@@ -1574,7 +1574,7 @@ spec:
           "targets": [
             {
               "exemplar": true,
-              "expr": "sum by (type) (increase(SeaweedFS_s3_request_total{type=~'PUT|COPY|POST|LIST'}[$__range]))*0.000005",
+              "expr": "sum by (type) (increase(SeaweedFS_s3_request_total{cluster=\"$cluster\", type=~'PUT|COPY|POST|LIST'}[$__range]))*0.000005",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1584,7 +1584,7 @@ spec:
             },
             {
               "exemplar": true,
-              "expr": "sum(increase(SeaweedFS_s3_request_total{type=~'PUT|COPY|POST|LIST'}[$__range]))*0.000005",
+              "expr": "sum(increase(SeaweedFS_s3_request_total{cluster=\"$cluster\", type=~'PUT|COPY|POST|LIST'}[$__range]))*0.000005",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1594,7 +1594,7 @@ spec:
             },
             {
               "exemplar": true,
-              "expr": "sum (increase(SeaweedFS_s3_request_total{type!~'PUT|COPY|POST|LIST'}[$__range]))*0.0000004",
+              "expr": "sum (increase(SeaweedFS_s3_request_total{cluster=\"$cluster\", type!~'PUT|COPY|POST|LIST'}[$__range]))*0.0000004",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1604,7 +1604,7 @@ spec:
             },
             {
               "exemplar": true,
-              "expr": "sum by (type) (increase(SeaweedFS_s3_request_total{type!~'PUT|COPY|POST|LIST'}[$__range]))*0.0000004",
+              "expr": "sum by (type) (increase(SeaweedFS_s3_request_total{cluster=\"$cluster\", type!~'PUT|COPY|POST|LIST'}[$__range]))*0.0000004",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1830,7 +1830,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(SeaweedFS_volumeServer_request_total[$__rate_interval])) by (type)",
+              "expr": "sum(rate(SeaweedFS_volumeServer_request_total{cluster=\"$cluster\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -1922,7 +1922,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(SeaweedFS_volumeServer_volumes) by (collection, type)",
+              "expr": "sum(SeaweedFS_volumeServer_volumes{cluster=\"$cluster\"}) by (collection, type)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -1930,7 +1930,7 @@ spec:
               "refId": "A"
             },
             {
-              "expr": "sum(SeaweedFS_volumeServer_max_volumes)",
+              "expr": "sum(SeaweedFS_volumeServer_max_volumes{cluster=\"$cluster\"})",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Total",
@@ -2021,7 +2021,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(SeaweedFS_volumeServer_total_disk_size) by (collection, type)",
+              "expr": "sum(SeaweedFS_volumeServer_total_disk_size{cluster=\"$cluster\"}) by (collection, type)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -2029,7 +2029,7 @@ spec:
               "refId": "A"
             },
             {
-              "expr": "sum(SeaweedFS_volumeServer_total_disk_size)",
+              "expr": "sum(SeaweedFS_volumeServer_total_disk_size{cluster=\"$cluster\"})",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Total",
@@ -2120,7 +2120,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(SeaweedFS_volumeServer_total_disk_size) by (exported_instance)",
+              "expr": "sum(SeaweedFS_volumeServer_total_disk_size{cluster=\"$cluster\"}) by (exported_instance)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -2334,7 +2334,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(SeaweedFS_filerStore_request_total[$__rate_interval])) by (type)",
+              "expr": "sum(rate(SeaweedFS_filerStore_request_total{cluster=\"$cluster\"}[$__rate_interval])) by (type)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{type}}",
@@ -3088,7 +3088,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max(SeaweedFS_s3_bucket_object_count) by (bucket)",
+              "expr": "max(SeaweedFS_s3_bucket_object_count{cluster=\"$cluster\"}) by (bucket)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -3181,7 +3181,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max(SeaweedFS_s3_bucket_size_bytes) by (bucket)",
+              "expr": "max(SeaweedFS_s3_bucket_size_bytes{cluster=\"$cluster\"}) by (bucket)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -3274,7 +3274,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max(SeaweedFS_s3_bucket_physical_size_bytes) by (bucket)",
+              "expr": "max(SeaweedFS_s3_bucket_physical_size_bytes{cluster=\"$cluster\"}) by (bucket)",
               "format": "time_series",
               "hide": false,
               "intervalFactor": 2,
@@ -3343,6 +3343,29 @@ spec:
             "regex": "",
             "skipUrlSync": false,
             "type": "datasource"
+          },
+          {
+            "current": {},
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${DS_PROMETHEUS}"
+            },
+            "definition": "label_values(SeaweedFS_build_info, cluster)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Cluster",
+            "multi": false,
+            "name": "cluster",
+            "options": [],
+            "query": {
+              "query": "label_values(SeaweedFS_build_info, cluster)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
           }
         ]
       },
