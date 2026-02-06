@@ -5,49 +5,44 @@ metadata:
   namespace: argocd
 spec:
   project: default
-  source:
-    repoURL: https://grafana-community.github.io/helm-charts
-    chart: tempo
-    targetRevision: 1.26.1
-    helm:
-      valuesObject:
-        tempo:
-          multitenancyEnabled: false
-          retention: 2160h
-          storage:
-            trace:
-              backend: s3
-              s3:
-                bucket: tempo-traces
-                endpoint: seaweedfs-filer.seaweedfs.svc.cluster.local:8333
-                region: us-east-1
-                forcepathstyle: true
-                insecure: true
-                access_key: dummy
-                secret_key: dummy
-              wal:
-                path: /var/tempo/wal
-          receivers:
-            otlp:
-              protocols:
-                grpc:
-                  endpoint: "0.0.0.0:4317"
-                http:
-                  endpoint: "0.0.0.0:4318"
-        service:
-          type: ClusterIP
-        ingress:
-          enabled: true
-          ingressClassName: traefik
-          hosts:
-            - host: tempo.homek8s-base.local
-              paths:
-                - path: /
-                  pathType: Prefix
-        persistence:
-          enabled: false
-        serviceMonitor:
-          enabled: false
+  sources:
+    - repoURL: https://grafana-community.github.io/helm-charts
+      chart: tempo
+      targetRevision: 1.26.1
+      helm:
+        valuesObject:
+          tempo:
+            multitenancyEnabled: false
+            retention: 2160h
+            storage:
+              trace:
+                backend: s3
+                s3:
+                  bucket: tempo-traces
+                  endpoint: seaweedfs-filer.seaweedfs.svc.cluster.local:8333
+                  region: us-east-1
+                  forcepathstyle: true
+                  insecure: true
+                  access_key: dummy
+                  secret_key: dummy
+                wal:
+                  path: /var/tempo/wal
+            receivers:
+              otlp:
+                protocols:
+                  grpc:
+                    endpoint: "0.0.0.0:4317"
+                  http:
+                    endpoint: "0.0.0.0:4318"
+          service:
+            type: ClusterIP
+          persistence:
+            enabled: false
+          serviceMonitor:
+            enabled: false
+    - repoURL: https://github.com/hmdyt/homek8s-base.git
+      targetRevision: HEAD
+      path: tempo
   destination:
     server: https://kubernetes.default.svc
     namespace: tempo
