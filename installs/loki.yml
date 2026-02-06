@@ -19,6 +19,35 @@ spec:
           structuredConfig:
             memberlist:
               join_members: []
+            common:
+              ring:
+                kvstore:
+                  store: inmemory
+            ingester:
+              lifecycler:
+                ring:
+                  kvstore:
+                    store: inmemory
+            distributor:
+              ring:
+                kvstore:
+                  store: inmemory
+            query_scheduler:
+              scheduler_ring:
+                kvstore:
+                  store: inmemory
+            compactor:
+              compactor_ring:
+                kvstore:
+                  store: inmemory
+            ruler:
+              ring:
+                kvstore:
+                  store: inmemory
+            index_gateway:
+              ring:
+                kvstore:
+                  store: inmemory
           schemaConfig:
             configs:
               - from: "2026-01-01"
