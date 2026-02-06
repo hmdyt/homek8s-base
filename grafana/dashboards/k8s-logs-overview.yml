@@ -24,7 +24,7 @@ spec:
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
           "targets": [
             {
-              "datasource": {"type": "loki", "uid": "${DS_LOKI}"},
+              "datasource": {"type": "prometheus", "uid": "${DS_MIMIR}"},
               "expr": "namespace:log_lines_total:1m{cluster=\"$cluster\", namespace=~\"$namespace\"}",
               "refId": "A",
               "legendFormat": "{{namespace}}"
@@ -47,7 +47,7 @@ spec:
           "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
           "targets": [
             {
-              "datasource": {"type": "loki", "uid": "${DS_LOKI}"},
+              "datasource": {"type": "prometheus", "uid": "${DS_MIMIR}"},
               "expr": "namespace:log_errors_total:1m{cluster=\"$cluster\", namespace=~\"$namespace\"}",
               "refId": "A",
               "legendFormat": "{{namespace}}"
@@ -94,6 +94,13 @@ spec:
             "type": "datasource",
             "query": "loki",
             "current": {"text": "Loki", "value": "loki"},
+            "hide": 0
+          },
+          {
+            "name": "DS_MIMIR",
+            "type": "datasource",
+            "query": "prometheus",
+            "current": {"text": "Mimir", "value": "mimir"},
             "hide": 0
           },
           {
