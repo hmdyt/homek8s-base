@@ -1289,7 +1289,7 @@ spec:
           },
           "id": 16,
           "options": {
-            "bucketSize": 30,
+            "bucketSize": 1,
             "combine": false,
             "fillOpacity": 80,
             "gradientMode": "none",
