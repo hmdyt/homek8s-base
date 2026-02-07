@@ -13,3 +13,5 @@ spec:
   datasources:
     - inputName: DS_PROMETHEUS
       datasourceName: Mimir
+    - inputName: DS_METRICS
+      datasourceName: Mimir
