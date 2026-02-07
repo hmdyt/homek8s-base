@@ -27,6 +27,9 @@ spec:
                   secret_key: dummy
                 wal:
                   path: /var/tempo/wal
+            metricsGenerator:
+              enabled: true
+              remoteWriteUrl: "http://mimir-nginx.mimir.svc:80/api/v1/push"
             receivers:
               otlp:
                 protocols:
@@ -34,6 +37,11 @@ spec:
                     endpoint: "0.0.0.0:4317"
                   http:
                     endpoint: "0.0.0.0:4318"
+            overrides:
+              defaults:
+                metrics_generator:
+                  processors:
+                    - span-metrics
           service:
             type: ClusterIP
           persistence:
