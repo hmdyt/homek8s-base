@@ -15,7 +15,7 @@ spec:
     replicas: 1
     storageClassName: synology-iscsi-volume2
     requests:
-      storage: 10Gi
+      storage: 100Gi
     metricsPort: 9325
 
   filer:
