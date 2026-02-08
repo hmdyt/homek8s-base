@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: node-disk-usage-alerts
+  namespace: mimir
+spec:
+  groups:
+    - name: node_disk_usage
+      rules:
+        - alert: NodeDiskUsageWarning
+          expr: |-
+            (
+              1 - node_filesystem_avail_bytes{fstype=~"ext4|xfs|btrfs", mountpoint="/"}
+              / node_filesystem_size_bytes{fstype=~"ext4|xfs|btrfs", mountpoint="/"}
+            ) > 0.80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Node {{ $labels.nodename }} disk usage above 80%"
+            description: "Mountpoint {{ $labels.mountpoint }}: {{ $value | humanizePercentage }} used"
+        - alert: NodeDiskUsageCritical
+          expr: |-
+            (
+              1 - node_filesystem_avail_bytes{fstype=~"ext4|xfs|btrfs", mountpoint="/"}
+              / node_filesystem_size_bytes{fstype=~"ext4|xfs|btrfs", mountpoint="/"}
+            ) > 0.90
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Node {{ $labels.nodename }} disk usage above 90%"
+            description: "Mountpoint {{ $labels.mountpoint }}: {{ $value | humanizePercentage }} used"
