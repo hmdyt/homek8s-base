@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: pv-usage-alerts
+  namespace: mimir
+spec:
+  groups:
+    - name: pv_usage
+      rules:
+        - alert: PersistentVolumeUsageWarning
+          expr: |-
+            (
+              kubelet_volume_stats_used_bytes
+              / kubelet_volume_stats_capacity_bytes
+            ) > 0.80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} usage above 80%"
+            description: "Current usage: {{ $value | humanizePercentage }}"
+        - alert: PersistentVolumeUsageCritical
+          expr: |-
+            (
+              kubelet_volume_stats_used_bytes
+              / kubelet_volume_stats_capacity_bytes
+            ) > 0.90
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "PVC {{ $labels.namespace }}/{{ $labels.persistentvolumeclaim }} usage above 90%"
+            description: "Current usage: {{ $value | humanizePercentage }}"
