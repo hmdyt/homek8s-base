@@ -1,0 +1,69 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: grafana-discord-report
+  namespace: grafana
+spec:
+  schedule: "0 3,9,15,21 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: report
+              image: curlimages/curl:latest
+              env:
+                - name: GRAFANA_URL
+                  value: http://grafana-service.grafana.svc:3000
+                - name: GRAFANA_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: grafana-renderer-token
+                      key: token
+                - name: DISCORD_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: discord-webhook
+                      key: url
+              command:
+                - /bin/sh
+                - -ec
+                - |
+                  RENDER_PARAMS="from=now-24h&to=now&width=1800&height=900&kiosk=tv&tz=Asia%2FTokyo&theme=dark"
+
+                  render_and_send() {
+                    local uid="$1"
+                    local name="$2"
+                    local filename="$3"
+
+                    echo "Rendering dashboard: ${name} (${uid})"
+                    curl -sf -H "Authorization: Bearer ${GRAFANA_TOKEN}" \
+                      "${GRAFANA_URL}/render/d/${uid}?${RENDER_PARAMS}" \
+                      -o "/tmp/${filename}"
+
+                    echo "Sending ${filename} to Discord"
+                    curl -sf -F "file=@/tmp/${filename}" \
+                      -F "payload_json={\"content\":\"${name}\"}" \
+                      "${DISCORD_WEBHOOK_URL}"
+                  }
+
+                  # Dashboard 1: k8s-nodes-overview (known UID)
+                  render_and_send "k8s-nodes-overview" "K8s Nodes Overview" "k8s-nodes-overview.png"
+
+                  # Dashboard 2: Kubernetes / Views / Global (resolve UID via search API)
+                  GLOBAL_UID=$(curl -sf -H "Authorization: Bearer ${GRAFANA_TOKEN}" \
+                    "${GRAFANA_URL}/api/search?query=Kubernetes%20%2F%20Views%20%2F%20Global&type=dash-db" \
+                    | sed -n 's/.*"uid":"\([^"]*\)".*/\1/p')
+
+                  if [ -z "${GLOBAL_UID}" ]; then
+                    echo "ERROR: Could not resolve UID for 'Kubernetes / Views / Global'"
+                    exit 1
+                  fi
+
+                  render_and_send "${GLOBAL_UID}" "Kubernetes / Views / Global" "k8s-views-global.png"
+
+                  echo "Done"

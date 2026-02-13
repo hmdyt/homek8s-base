@@ -17,6 +17,18 @@ spec:
       enabled: "true"
     alerting:
       enabled: "false"
+    rendering:
+      server_url: http://localhost:8081/render
   deployment:
     spec:
       replicas: 1
+      template:
+        spec:
+          containers:
+            - name: image-renderer
+              image: grafana/grafana-image-renderer:latest
+              resources:
+                requests:
+                  memory: "512Mi"
+                limits:
+                  memory: "2Gi"

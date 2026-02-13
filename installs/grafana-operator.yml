@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: ghcr.io/grafana/helm-charts
     chart: grafana-operator
-    targetRevision: v5.17.0
+    targetRevision: v5.21.4
     helm:
       valuesObject:
         watchNamespaces: "grafana"
