@@ -54,16 +54,7 @@ spec:
                   # Dashboard 1: k8s-nodes-overview (known UID)
                   render_and_send "k8s-nodes-overview" "K8s Nodes Overview" "k8s-nodes-overview.png"
 
-                  # Dashboard 2: Kubernetes / Views / Global (resolve UID via search API)
-                  GLOBAL_UID=$(curl -sf -H "Authorization: Bearer ${GRAFANA_TOKEN}" \
-                    "${GRAFANA_URL}/api/search?query=Kubernetes%20%2F%20Views%20%2F%20Global&type=dash-db" \
-                    | sed -n 's/.*"uid":"\([^"]*\)".*/\1/p')
-
-                  if [ -z "${GLOBAL_UID}" ]; then
-                    echo "ERROR: Could not resolve UID for 'Kubernetes / Views / Global'"
-                    exit 1
-                  fi
-
-                  render_and_send "${GLOBAL_UID}" "Kubernetes / Views / Global" "k8s-views-global.png"
+                  # Dashboard 2: Kubernetes / Views / Global (known UID)
+                  render_and_send "k8s_views_global" "Kubernetes / Views / Global" "k8s-views-global.png"
 
                   echo "Done"
