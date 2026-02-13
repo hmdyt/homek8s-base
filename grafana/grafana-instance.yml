@@ -28,6 +28,15 @@ spec:
           containers:
             - name: image-renderer
               image: grafana/grafana-image-renderer:latest
+              env:
+                - name: HTTP_HOST
+                  value: "0.0.0.0"
+                - name: RENDERING_MODE
+                  value: clustered
+                - name: RENDERING_CLUSTERING_MAX_CONCURRENCY
+                  value: "5"
+                - name: RENDERING_CLUSTERING_TIMEOUT
+                  value: "120"
               resources:
                 requests:
                   memory: "512Mi"

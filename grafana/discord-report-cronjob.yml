@@ -33,7 +33,7 @@ spec:
                 - /bin/sh
                 - -ec
                 - |
-                  RENDER_PARAMS="from=now-24h&to=now&width=1800&height=900&kiosk=tv&tz=Asia%2FTokyo&theme=dark"
+                  RENDER_PARAMS="from=now-24h&to=now&width=1800&height=900&kiosk=tv&tz=Asia%2FTokyo&theme=dark&timeout=120"
 
                   render_and_send() {
                     local uid="$1"
@@ -41,12 +41,12 @@ spec:
                     local filename="$3"
 
                     echo "Rendering dashboard: ${name} (${uid})"
-                    curl -sf -H "Authorization: Bearer ${GRAFANA_TOKEN}" \
+                    curl -sf --max-time 150 -H "Authorization: Bearer ${GRAFANA_TOKEN}" \
                       "${GRAFANA_URL}/render/d/${uid}?${RENDER_PARAMS}" \
                       -o "/tmp/${filename}"
 
                     echo "Sending ${filename} to Discord"
-                    curl -sf -F "file=@/tmp/${filename}" \
+                    curl -sf --max-time 30 -F "file=@/tmp/${filename}" \
                       -F "payload_json={\"content\":\"${name}\"}" \
                       "${DISCORD_WEBHOOK_URL}"
                   }
