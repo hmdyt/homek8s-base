@@ -19,6 +19,7 @@ spec:
       enabled: "false"
     rendering:
       server_url: http://localhost:8081/render
+      callback_url: http://localhost:3000
   deployment:
     spec:
       replicas: 1
