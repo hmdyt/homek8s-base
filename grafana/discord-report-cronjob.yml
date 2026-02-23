@@ -33,47 +33,45 @@ spec:
                 - /bin/sh
                 - -ec
                 - |
-                  RENDER_PARAMS="from=now-24h&to=now&width=1800&height=600&tz=Asia%2FTokyo&theme=dark&timeout=60"
+                  COMMON="from=now-24h&to=now&width=1800&height=600&tz=Asia%2FTokyo&theme=dark&timeout=60"
+                  GLOBAL_VARS="var-datasource=mimir&var-cluster=&var-job=node-exporter&var-resolution=30s"
 
                   render_panel() {
                     local uid="$1"
                     local panel_id="$2"
                     local name="$3"
                     local filename="$4"
+                    local extra="${5:-}"
 
                     echo "Rendering: ${name}"
                     curl -sf --max-time 90 -H "Authorization: Bearer ${GRAFANA_TOKEN}" \
-                      "${GRAFANA_URL}/render/d-solo/${uid}?panelId=${panel_id}&${RENDER_PARAMS}" \
+                      "${GRAFANA_URL}/render/d-solo/${uid}?panelId=${panel_id}&${COMMON}&${extra}" \
                       -o "/tmp/${filename}"
                   }
 
-                  # Resource Utilization
-                  render_panel k8s_views_global 72 "Cluster CPU Utilization" "01-cluster-cpu.png"
-                  render_panel k8s_views_global 55 "Cluster Memory Utilization" "02-cluster-mem.png"
+                  # Cluster-wide (k8s_views_global - requires template vars)
+                  render_panel k8s_views_global 72 "Cluster CPU Utilization" "1-cluster-cpu.png" "${GLOBAL_VARS}"
+                  render_panel k8s_views_global 55 "Cluster Memory Utilization" "2-cluster-mem.png" "${GLOBAL_VARS}"
+                  render_panel k8s_views_global 44 "Global Network Utilization" "3-network.png" "${GLOBAL_VARS}"
 
-                  # Per-Node
-                  render_panel k8s-nodes-overview 1 "CPU Usage by Node" "03-node-cpu.png"
-                  render_panel k8s-nodes-overview 2 "Memory Usage by Node" "04-node-mem.png"
-                  render_panel k8s-nodes-overview 4 "Disk Usage by Node" "05-node-disk.png"
-
-                  # Failure Signals
-                  render_panel k8s_views_global 87 "OOM Events by namespace" "06-oom.png"
-                  render_panel k8s_views_global 88 "Container Restarts by namespace" "07-restarts.png"
-
-                  # Network
-                  render_panel k8s_views_global 44 "Global Network Utilization" "08-network.png"
+                  # Per-Node (k8s-nodes-overview - no template vars needed)
+                  render_panel k8s-nodes-overview 1 "CPU Usage by Node" "4-node-cpu.png"
+                  render_panel k8s-nodes-overview 2 "Memory Usage by Node" "5-node-mem.png"
+                  render_panel k8s-nodes-overview 4 "Disk Usage by Node" "6-node-disk.png"
+                  render_panel k8s-nodes-overview 5 "Network I/O by Node" "7-node-net.png"
+                  render_panel k8s-nodes-overview 3 "Load Average (1m) by Node" "8-node-load.png"
 
                   # Send all images to Discord in one message
                   echo "Sending to Discord"
                   curl -sf --max-time 30 \
-                    -F "file1=@/tmp/01-cluster-cpu.png" \
-                    -F "file2=@/tmp/02-cluster-mem.png" \
-                    -F "file3=@/tmp/03-node-cpu.png" \
-                    -F "file4=@/tmp/04-node-mem.png" \
-                    -F "file5=@/tmp/05-node-disk.png" \
-                    -F "file6=@/tmp/06-oom.png" \
-                    -F "file7=@/tmp/07-restarts.png" \
-                    -F "file8=@/tmp/08-network.png" \
+                    -F "file1=@/tmp/1-cluster-cpu.png" \
+                    -F "file2=@/tmp/2-cluster-mem.png" \
+                    -F "file3=@/tmp/3-network.png" \
+                    -F "file4=@/tmp/4-node-cpu.png" \
+                    -F "file5=@/tmp/5-node-mem.png" \
+                    -F "file6=@/tmp/6-node-disk.png" \
+                    -F "file7=@/tmp/7-node-net.png" \
+                    -F "file8=@/tmp/8-node-load.png" \
                     -F 'payload_json={"content":"Cluster Health Report (24h)"}' \
                     "${DISCORD_WEBHOOK_URL}"
 
