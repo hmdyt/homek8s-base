@@ -33,28 +33,48 @@ spec:
                 - /bin/sh
                 - -ec
                 - |
-                  RENDER_PARAMS="from=now-24h&to=now&width=1800&height=900&kiosk=tv&tz=Asia%2FTokyo&theme=dark&timeout=120"
+                  RENDER_PARAMS="from=now-24h&to=now&width=1800&height=600&tz=Asia%2FTokyo&theme=dark&timeout=60"
 
-                  render_and_send() {
+                  render_panel() {
                     local uid="$1"
-                    local name="$2"
-                    local filename="$3"
+                    local panel_id="$2"
+                    local name="$3"
+                    local filename="$4"
 
-                    echo "Rendering dashboard: ${name} (${uid})"
-                    curl -sf --max-time 150 -H "Authorization: Bearer ${GRAFANA_TOKEN}" \
-                      "${GRAFANA_URL}/render/d/${uid}?${RENDER_PARAMS}" \
+                    echo "Rendering: ${name}"
+                    curl -sf --max-time 90 -H "Authorization: Bearer ${GRAFANA_TOKEN}" \
+                      "${GRAFANA_URL}/render/d-solo/${uid}?panelId=${panel_id}&${RENDER_PARAMS}" \
                       -o "/tmp/${filename}"
-
-                    echo "Sending ${filename} to Discord"
-                    curl -sf --max-time 30 -F "file=@/tmp/${filename}" \
-                      -F "payload_json={\"content\":\"${name}\"}" \
-                      "${DISCORD_WEBHOOK_URL}"
                   }
 
-                  # Dashboard 1: k8s-nodes-overview (known UID)
-                  render_and_send "k8s-nodes-overview" "K8s Nodes Overview" "k8s-nodes-overview.png"
+                  # Resource Utilization
+                  render_panel k8s_views_global 72 "Cluster CPU Utilization" "01-cluster-cpu.png"
+                  render_panel k8s_views_global 55 "Cluster Memory Utilization" "02-cluster-mem.png"
 
-                  # Dashboard 2: Kubernetes / Views / Global (known UID)
-                  render_and_send "k8s_views_global" "Kubernetes / Views / Global" "k8s-views-global.png"
+                  # Per-Node
+                  render_panel k8s-nodes-overview 1 "CPU Usage by Node" "03-node-cpu.png"
+                  render_panel k8s-nodes-overview 2 "Memory Usage by Node" "04-node-mem.png"
+                  render_panel k8s-nodes-overview 4 "Disk Usage by Node" "05-node-disk.png"
+
+                  # Failure Signals
+                  render_panel k8s_views_global 87 "OOM Events by namespace" "06-oom.png"
+                  render_panel k8s_views_global 88 "Container Restarts by namespace" "07-restarts.png"
+
+                  # Network
+                  render_panel k8s_views_global 44 "Global Network Utilization" "08-network.png"
+
+                  # Send all images to Discord in one message
+                  echo "Sending to Discord"
+                  curl -sf --max-time 30 \
+                    -F "file1=@/tmp/01-cluster-cpu.png" \
+                    -F "file2=@/tmp/02-cluster-mem.png" \
+                    -F "file3=@/tmp/03-node-cpu.png" \
+                    -F "file4=@/tmp/04-node-mem.png" \
+                    -F "file5=@/tmp/05-node-disk.png" \
+                    -F "file6=@/tmp/06-oom.png" \
+                    -F "file7=@/tmp/07-restarts.png" \
+                    -F "file8=@/tmp/08-network.png" \
+                    -F 'payload_json={"content":"Cluster Health Report (24h)"}' \
+                    "${DISCORD_WEBHOOK_URL}"
 
                   echo "Done"
