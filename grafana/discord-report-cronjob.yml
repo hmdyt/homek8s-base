@@ -65,12 +65,11 @@ spec:
 
                   # Combine into a single image (2 columns x 4 rows)
                   echo "Combining images"
-                  magick montage -label '' \
-                          /tmp/1-cluster-cpu.png /tmp/2-cluster-mem.png \
-                          /tmp/4-node-cpu.png /tmp/5-node-mem.png \
-                          /tmp/3-network.png /tmp/7-node-net.png \
-                          /tmp/6-node-disk.png /tmp/8-node-load.png \
-                          -tile 2x4 -geometry 900x300+0+0 /tmp/report.png
+                  convert /tmp/1-cluster-cpu.png /tmp/2-cluster-mem.png +append /tmp/row1.png
+                  convert /tmp/4-node-cpu.png /tmp/5-node-mem.png +append /tmp/row2.png
+                  convert /tmp/3-network.png /tmp/7-node-net.png +append /tmp/row3.png
+                  convert /tmp/6-node-disk.png /tmp/8-node-load.png +append /tmp/row4.png
+                  convert /tmp/row1.png /tmp/row2.png /tmp/row3.png /tmp/row4.png -append /tmp/report.png
 
                   echo "Sending to Discord"
                   curl -sf --max-time 30 \
