@@ -15,7 +15,7 @@ spec:
           restartPolicy: Never
           containers:
             - name: report
-              image: curlimages/curl:latest
+              image: alpine:latest
               env:
                 - name: GRAFANA_URL
                   value: http://grafana-service.grafana.svc:3000
@@ -33,6 +33,8 @@ spec:
                 - /bin/sh
                 - -ec
                 - |
+                  apk add --no-cache curl imagemagick > /dev/null 2>&1
+
                   COMMON="from=now-24h&to=now&width=1800&height=600&tz=Asia%2FTokyo&theme=dark&timeout=60"
                   GLOBAL_VARS="var-datasource=mimir&var-cluster=&var-job=integrations%2Funix&var-resolution=30s"
 
@@ -61,17 +63,17 @@ spec:
                   render_panel k8s-nodes-overview 5 "Network I/O by Node" "7-node-net.png"
                   render_panel k8s-nodes-overview 3 "Load Average (1m) by Node" "8-node-load.png"
 
-                  # Send all images to Discord in one message
+                  # Combine into a single image (2 columns x 4 rows)
+                  echo "Combining images"
+                  montage /tmp/1-cluster-cpu.png /tmp/2-cluster-mem.png \
+                          /tmp/4-node-cpu.png /tmp/5-node-mem.png \
+                          /tmp/3-network.png /tmp/7-node-net.png \
+                          /tmp/6-node-disk.png /tmp/8-node-load.png \
+                          -tile 2x4 -geometry 900x300+0+0 /tmp/report.png
+
                   echo "Sending to Discord"
                   curl -sf --max-time 30 \
-                    -F "file1=@/tmp/1-cluster-cpu.png" \
-                    -F "file2=@/tmp/2-cluster-mem.png" \
-                    -F "file3=@/tmp/3-network.png" \
-                    -F "file4=@/tmp/4-node-cpu.png" \
-                    -F "file5=@/tmp/5-node-mem.png" \
-                    -F "file6=@/tmp/6-node-disk.png" \
-                    -F "file7=@/tmp/7-node-net.png" \
-                    -F "file8=@/tmp/8-node-load.png" \
+                    -F "file=@/tmp/report.png" \
                     -F 'payload_json={"content":"Cluster Health Report (24h)"}' \
                     "${DISCORD_WEBHOOK_URL}"
 
