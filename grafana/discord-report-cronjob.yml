@@ -34,7 +34,7 @@ spec:
                 - -ec
                 - |
                   COMMON="from=now-24h&to=now&width=1800&height=600&tz=Asia%2FTokyo&theme=dark&timeout=60"
-                  GLOBAL_VARS="var-datasource=mimir&var-cluster=&var-job=node-exporter&var-resolution=30s"
+                  GLOBAL_VARS="var-datasource=mimir&var-cluster=&var-job=integrations%2Funix&var-resolution=30s"
 
                   render_panel() {
                     local uid="$1"
