@@ -1623,7 +1623,7 @@ spec:
         "list": [
           {
             "current": {},
-            "datasource": "mimir",
+            "datasource": {"type": "prometheus", "uid": "mimir"},
             "definition": "query_result(up{job=~\"$job\"})",
             "description": "",
             "includeAll": true,
@@ -1640,7 +1640,7 @@ spec:
           },
           {
             "current": {},
-            "datasource": "mimir",
+            "datasource": {"type": "prometheus", "uid": "mimir"},
             "definition": "query_result(minecraft_entities)",
             "includeAll": false,
             "name": "job",
