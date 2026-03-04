@@ -11,6 +11,10 @@ spec:
       mode: console
     auth:
       disable_login_form: "false"
+    auth.anonymous:
+      enabled: "true"
+      org_role: Viewer
+      hide_version: "true"
     server:
       root_url: https://grafana.yhmd.dev
     unified_alerting:
