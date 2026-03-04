@@ -1641,16 +1641,16 @@ spec:
           {
             "current": {},
             "datasource": {"type": "prometheus", "uid": "mimir"},
-            "definition": "query_result(minecraft_entities)",
+            "definition": "label_values(minecraft_tps, job)",
             "includeAll": false,
             "name": "job",
             "options": [],
             "query": {
-              "query": "query_result(minecraft_entities)",
+              "query": "label_values(minecraft_tps, job)",
               "refId": "StandardVariableQuery"
             },
             "refresh": 1,
-            "regex": "/.*job=\"([^\"]+)/",
+            "regex": "",
             "type": "query"
           }
         ]
