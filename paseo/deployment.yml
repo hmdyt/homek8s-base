@@ -25,6 +25,8 @@ spec:
           ports:
             - containerPort: 6767
           env:
+            - name: PATH
+              value: "/home/paseo/.local/share/mise/shims:/home/paseo/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             - name: PASEO_HOME
               value: /home/paseo
             - name: PASEO_WEB_UI_ENABLED
