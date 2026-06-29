@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: paseo-mise-config
+  namespace: paseo
+data:
+  config.toml: |
+    [tools]
+    go = "latest"
+    gh = "latest"
+    kubectl = "latest"
+    k9s = "latest"
+    rust = "latest"                 # fj(cargo backend)のビルドに必要
+    "cargo:forgejo-cli" = "latest"  # Forgejo CLI -> `fj`

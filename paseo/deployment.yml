@@ -43,6 +43,10 @@ spec:
           volumeMounts:
             - name: home
               mountPath: /home/paseo
+            - name: mise-config
+              mountPath: /home/paseo/.config/mise/config.toml
+              subPath: config.toml
+              readOnly: true
           resources:
             requests:
               cpu: 250m
@@ -67,3 +71,6 @@ spec:
         - name: home
           persistentVolumeClaim:
             claimName: paseo-home
+        - name: mise-config
+          configMap:
+            name: paseo-mise-config
