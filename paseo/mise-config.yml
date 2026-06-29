@@ -10,4 +10,6 @@ data:
     gh = "latest"
     kubectl = "latest"
     k9s = "latest"
+    python = "latest"
+    jq = "latest"
     "go:code.gitea.io/tea" = "latest"  # Forgejo/Gitea CLI -> `tea` (Goビルド, cc不要)
