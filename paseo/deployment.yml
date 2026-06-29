@@ -47,6 +47,10 @@ spec:
               mountPath: /home/paseo/.config/mise/config.toml
               subPath: config.toml
               readOnly: true
+            - name: kubeconfig
+              mountPath: /home/paseo/.kube/config
+              subPath: config
+              readOnly: true
           resources:
             requests:
               cpu: 250m
@@ -74,3 +78,6 @@ spec:
         - name: mise-config
           configMap:
             name: paseo-mise-config
+        - name: kubeconfig
+          secret:
+            secretName: paseo-kubeconfig
