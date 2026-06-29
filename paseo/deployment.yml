@@ -21,7 +21,7 @@ spec:
         fsGroup: 1000
       containers:
         - name: paseo
-          image: ghcr.io/getpaseo/paseo:latest
+          image: ghcr.io/getpaseo/paseo:0.1.102-beta.1
           ports:
             - containerPort: 6767
           env:
