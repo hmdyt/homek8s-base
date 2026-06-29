@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paseo
+  namespace: paseo
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: paseo
+  template:
+    metadata:
+      labels:
+        app: paseo
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: paseo
+          image: ghcr.io/getpaseo/paseo:latest
+          ports:
+            - containerPort: 6767
+          env:
+            - name: PASEO_HOME
+              value: /home/paseo
+            - name: PASEO_WEB_UI_ENABLED
+              value: "true"
+            - name: PASEO_HOSTNAMES
+              value: "paseo.yhmd.dev,.yhmd.dev"
+            - name: PASEO_TRUSTED_PROXIES
+              value: "loopback,10.42.0.0/16"
+            - name: PASEO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: paseo-secrets
+                  key: PASEO_PASSWORD
+          volumeMounts:
+            - name: home
+              mountPath: /home/paseo
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "4"
+              memory: 4Gi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 6767
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 6767
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 6
+      volumes:
+        - name: home
+          persistentVolumeClaim:
+            claimName: paseo-home
