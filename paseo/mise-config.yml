@@ -10,5 +10,4 @@ data:
     gh = "latest"
     kubectl = "latest"
     k9s = "latest"
-    rust = "latest"                 # fj(cargo backend)のビルドに必要
-    "cargo:forgejo-cli" = "latest"  # Forgejo CLI -> `fj`
+    "go:code.gitea.io/tea" = "latest"  # Forgejo/Gitea CLI -> `tea` (Goビルド, cc不要)
