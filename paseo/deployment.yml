@@ -26,6 +26,7 @@ spec:
       containers:
         - name: paseo
           image: ghcr.io/getpaseo/paseo:0.1.102-beta.1
+          workingDir: /home/paseo        # exec/loginを~(PVC)で開始。/workspaceは非永続
           ports:
             - containerPort: 6767
           env:
