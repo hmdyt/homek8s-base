@@ -31,7 +31,7 @@ spec:
             - containerPort: 6767
           env:
             - name: PATH
-              value: "/home/paseo/.local/share/mise/shims:/home/paseo/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+              value: "/home/paseo/.opencode/bin:/home/paseo/.local/share/mise/shims:/home/paseo/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             - name: SHELL
               value: /bin/bash
             - name: PASEO_HOME
