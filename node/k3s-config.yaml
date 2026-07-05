@@ -1,0 +1,16 @@
+# k8s-base-6 の /etc/rancher/k3s/config.yaml に手動配置するファイル(記録用・GitOps対象外)
+# 適用手順: このファイルをノードの /etc/rancher/k3s/config.yaml に置いて `systemctl restart k3s`
+#
+# 背景 (2026-07-05 障害):
+# ノードの MemAvailable が 1GiB を切るとカーネルの direct reclaim ストームが発生し、
+# sda (全local-path PV + k3s datastore + containerd が同居) の I/O が崩壊して
+# ノードごとフリーズ → NotReady → 全Podが liveness probe 一斉失敗で再起動、を繰り返した。
+# kubelet デフォルトの eviction 閾値 (memory.available<100Mi) では発動する前に
+# ノードが死ぬため、閾値を引き上げて早期に Pod を evict しノードを守る。
+kubelet-arg:
+  - "system-reserved=cpu=1,memory=2Gi"
+  - "eviction-hard=memory.available<1Gi"
+  - "eviction-soft=memory.available<2Gi"
+  - "eviction-soft-grace-period=memory.available=60s"
+  - "eviction-minimum-reclaim=memory.available=512Mi"
+  - "eviction-max-pod-grace-period=30"
