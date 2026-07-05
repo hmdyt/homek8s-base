@@ -13,3 +13,4 @@ data:
     python = "latest"
     jq = "latest"
     "go:code.gitea.io/tea" = "latest"  # Forgejo/Gitea CLI -> `tea` (Goビルド, cc不要)
+    "go:github.com/minio/mc" = "latest"
