@@ -1,0 +1,7 @@
+kubelet-arg:
+  - "system-reserved=cpu=1,memory=2Gi"
+  - "eviction-hard=memory.available<1Gi"
+  - "eviction-soft=memory.available<2Gi"
+  - "eviction-soft-grace-period=memory.available=60s"
+  - "eviction-minimum-reclaim=memory.available=512Mi"
+  - "eviction-max-pod-grace-period=30"
