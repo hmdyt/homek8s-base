@@ -31,9 +31,6 @@ spec:
               resources: ["prometheusrules"]
               verbs: ["get", "list", "watch"]
         alloy:
-          # goroutineリーク(rules系コンポーネントのinformer再作成)でノードのメモリを
-          # 食い潰した事故(2026-07-05)の再発防止。limit超過時はalloyがOOM再起動する
-          # だけでノードは守られる。平常時の実使用は~0.6Gi。
           resources:
             requests:
               cpu: 100m
