@@ -1,0 +1,3341 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: codex
+  namespace: grafana
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "description": "OpenAI Codex usage — sessions, tokens, latency, tools, and decisions. Covers both the Codex CLI (codex_exec) and the Codex desktop app (codex-app-server).",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [
+        {
+          "asDropdown": false,
+          "icon": "external link",
+          "keepTime": true,
+          "tags": [],
+          "targetBlank": false,
+          "title": "Logs →",
+          "tooltip": "Open Codex log explorer",
+          "type": "link",
+          "url": "/d/codex-logs"
+        },
+        {
+          "asDropdown": false,
+          "icon": "external link",
+          "keepTime": true,
+          "tags": [],
+          "targetBlank": false,
+          "title": "Claude Code →",
+          "tooltip": "Claude Code dashboard",
+          "type": "link",
+          "url": "/d/claude-code-observability"
+        }
+      ],
+      "refresh": "5m",
+      "schemaVersion": 39,
+      "tags": [
+        "codex"
+      ],
+      "time": {
+        "from": "now-24h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Codex",
+      "uid": "codex-observability",
+      "version": 1,
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "selected": true,
+              "text": "Mimir",
+              "value": "mimir"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": "Prometheus",
+            "multi": false,
+            "name": "datasource",
+            "options": [],
+            "query": "prometheus",
+            "refresh": 1,
+            "skipUrlSync": false,
+            "type": "datasource"
+          },
+          {
+            "current": {
+              "selected": true,
+              "text": "Loki",
+              "value": "loki"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": "Loki",
+            "multi": false,
+            "name": "loki_datasource",
+            "options": [],
+            "query": "loki",
+            "refresh": 1,
+            "skipUrlSync": false,
+            "type": "datasource"
+          }
+        ]
+      },
+      "panels": [
+        {
+          "id": 100,
+          "type": "text",
+          "gridPos": {
+            "x": 0,
+            "y": 0,
+            "w": 24,
+            "h": 3
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "### 🤖 About this dashboard\nMonitors **OpenAI Codex** activity across both surfaces: the **Codex CLI** (`service_name = codex_exec`) and the **Codex desktop app** (`service_name = codex-app-server`). All data is **log-sourced** from Codex's native OpenTelemetry export. Codex uses a WebSocket/SSE transport — latency comes from `codex.websocket_request` / `codex.websocket_event` durations, and **token counts** come from `codex.sse_event`. There is no per-request dollar cost in the Codex telemetry, so this dashboard tracks **usage and performance**, not spend."
+          }
+        },
+        {
+          "id": 201,
+          "type": "row",
+          "title": "🔢 Tokens & Usage",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 3,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 10,
+          "type": "stat",
+          "title": "Input Tokens",
+          "description": "Total input (prompt) tokens across all turns.",
+          "gridPos": {
+            "x": 0,
+            "y": 4,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "blue"
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(sum_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | unwrap attributes_input_token_count [$__range]))",
+              "legendFormat": "Input",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "type": "stat",
+          "title": "Output Tokens",
+          "description": "Total output (generated) tokens across all turns.",
+          "gridPos": {
+            "x": 6,
+            "y": 4,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "green"
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(sum_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | unwrap attributes_output_token_count [$__range]))",
+              "legendFormat": "Output",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "type": "stat",
+          "title": "Cached Tokens",
+          "description": "Total cached input tokens reused across turns (codex.sse_event cached_token_count). Higher cached share means cheaper, faster prompts.",
+          "gridPos": {
+            "x": 12,
+            "y": 4,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "yellow"
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(sum_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | unwrap attributes_cached_token_count [$__range]))",
+              "legendFormat": "Cached",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "type": "stat",
+          "title": "Reasoning Tokens",
+          "description": "Total reasoning tokens consumed (codex.sse_event reasoning_token_count) — the model's internal thinking budget.",
+          "gridPos": {
+            "x": 18,
+            "y": 4,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "purple"
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(sum_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | unwrap attributes_reasoning_token_count [$__range]))",
+              "legendFormat": "Reasoning",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "type": "stat",
+          "title": "Total Tokens",
+          "description": "Sum of input + output tokens across all turns (codex.sse_event input_token_count + output_token_count). Cached and reasoning tokens are shown separately in the Tokens section.",
+          "gridPos": {
+            "x": 0,
+            "y": 8,
+            "w": 8,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "purple"
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(sum_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | unwrap attributes_input_token_count [$__range])) + sum(sum_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | unwrap attributes_output_token_count [$__range]))",
+              "legendFormat": "Tokens",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Total Turns (SSE completions)",
+          "description": "Count of completed model responses (codex.sse_event with event.kind = response.completed). A proxy for total request turns.",
+          "gridPos": {
+            "x": 8,
+            "y": 8,
+            "w": 8,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "blue"
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | attributes_event_kind=\"response.completed\" [$__range]))",
+              "legendFormat": "Turns",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "type": "stat",
+          "title": "Total Conversations",
+          "description": "Distinct Codex conversations started in the selected range (codex.conversation_starts), across CLI and desktop.",
+          "gridPos": {
+            "x": 16,
+            "y": 8,
+            "w": 8,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "blue"
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.conversation_starts\" [$__range]))",
+              "legendFormat": "Conversations",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "type": "timeseries",
+          "title": "Token Usage Over Time — by Type",
+          "description": "Hourly input, output, cached, and reasoning token totals. Watch for rising input/cached over a long session (context growth).",
+          "gridPos": {
+            "x": 0,
+            "y": 12,
+            "w": 12,
+            "h": 7
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "sum"
+              ]
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 15,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(sum_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | unwrap attributes_input_token_count [$__auto]))",
+              "legendFormat": "input",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(sum_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | unwrap attributes_output_token_count [$__auto]))",
+              "legendFormat": "output",
+              "refId": "B"
+            },
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(sum_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | unwrap attributes_cached_token_count [$__auto]))",
+              "legendFormat": "cached",
+              "refId": "C"
+            },
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(sum_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | unwrap attributes_reasoning_token_count [$__auto]))",
+              "legendFormat": "reasoning",
+              "refId": "D"
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "type": "piechart",
+          "title": "Tokens by Surface (CLI vs Desktop)",
+          "description": "Share of output tokens generated by the Codex CLI (codex_exec) versus the desktop app (codex-app-server).",
+          "gridPos": {
+            "x": 12,
+            "y": 12,
+            "w": 12,
+            "h": 7
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "pieType": "donut",
+            "displayLabels": [
+              "percent",
+              "name"
+            ],
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum by (service_name) (sum_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | unwrap attributes_output_token_count [$__range]))",
+              "legendFormat": "{{service_name}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 206,
+          "type": "row",
+          "title": "🚀 Productivity & Output",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 19,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "Total Tool Calls",
+          "description": "Count of tool executions (codex.tool_result) across both surfaces.",
+          "gridPos": {
+            "x": 0,
+            "y": 20,
+            "w": 8,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "blue"
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" [$__range]))",
+              "legendFormat": "Tool Calls",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Tool Success Rate %",
+          "description": "Percentage of tool_result events with success=\"true\". Below 70% turns red, 70–85% yellow, above 85% green.",
+          "gridPos": {
+            "x": 8,
+            "y": 20,
+            "w": 8,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 1,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 70
+                  },
+                  {
+                    "color": "green",
+                    "value": 85
+                  }
+                ]
+              },
+              "mappings": [],
+              "noValue": "No tools"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" | attributes_success=\"true\" [$__range])) / sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" [$__range])) * 100",
+              "legendFormat": "Success %",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "p95 Turn Latency (ms)",
+          "description": "95th percentile WebSocket round-trip duration (codex.websocket_event duration_ms) — the closest available signal to model response time. Green < 5s, yellow < 15s, red ≥ 15s.",
+          "gridPos": {
+            "x": 16,
+            "y": 20,
+            "w": 8,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "decimals": 0,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 5000
+                  },
+                  {
+                    "color": "red",
+                    "value": 15000
+                  }
+                ]
+              },
+              "mappings": [],
+              "noValue": "—"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "max(quantile_over_time(0.95, {service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.websocket_event\" | unwrap attributes_duration_ms [$__range]) by (attributes_model))",
+              "legendFormat": "p95 ms",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "type": "timeseries",
+          "title": "Turns Over Time",
+          "description": "Completed model responses (sse_event response.completed) per hour. A proxy for request volume.",
+          "gridPos": {
+            "x": 0,
+            "y": 24,
+            "w": 12,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "blue"
+              },
+              "custom": {
+                "drawStyle": "bars",
+                "lineWidth": 1,
+                "fillOpacity": 70,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.sse_event\" | attributes_event_kind=\"response.completed\" [$__auto]))",
+              "legendFormat": "Turns",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "type": "timeseries",
+          "title": "Event Volume by Type — Over Time",
+          "description": "Codex event counts per hour by event type, excluding the high-volume websocket_event noise. Shows the rhythm of conversations, prompts, tool calls, and completions.",
+          "gridPos": {
+            "x": 12,
+            "y": 24,
+            "w": 12,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 20,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "normal",
+                  "group": "A"
+                },
+                "axisPlacement": "auto",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum by (attributes_event_name) (count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name!=\"codex.websocket_event\" | attributes_event_name!=\"codex.websocket_request\" [$__auto]))",
+              "legendFormat": "{{attributes_event_name}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 60,
+          "type": "stat",
+          "title": "Git Commands",
+          "description": "Count of shell tool calls whose command text contains 'git ' — a proxy for git activity. Codex emits no native git metrics, so this is derived from the command stream (codex.tool_result arguments).",
+          "gridPos": {
+            "x": 0,
+            "y": 30,
+            "w": 8,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "blue"
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" |~ \"git \" [$__range]))",
+              "legendFormat": "Git Commands (24h)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 61,
+          "type": "stat",
+          "title": "Commits",
+          "description": "Count of shell tool calls containing 'git commit' — a proxy for commits made by Codex. Derived from command text, not a native counter (Codex does not emit one). Pairs with Claude Code's Commits panel.",
+          "gridPos": {
+            "x": 8,
+            "y": 30,
+            "w": 8,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "green"
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" |~ \"git commit\" [$__range]))",
+              "legendFormat": "Commits (24h)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 62,
+          "type": "stat",
+          "title": "File Edit Actions",
+          "description": "Shell tool calls that write or patch files (Set-Content, Out-File, apply_patch, Add-Content, or shell redirection into a file) — a proxy for code edits. Codex routes file edits through the shell, so this is command-derived, not a line count.",
+          "gridPos": {
+            "x": 16,
+            "y": 30,
+            "w": 8,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "purple"
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" |~ \"(Set-Content|Out-File|Add-Content|apply_patch)\" [$__range]))",
+              "legendFormat": "File Edit Actions (24h)",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 63,
+          "type": "timeseries",
+          "title": "Code Activity Over Time (proxy)",
+          "description": "Hourly count of git commands and file-edit actions detected in Codex's shell command stream. A proxy for code-modification activity since Codex emits no native lines-of-code or commit metrics. Compare shape to Claude Code's Code Modification Velocity.",
+          "gridPos": {
+            "x": 0,
+            "y": 34,
+            "w": 24,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "bars",
+                "lineWidth": 1,
+                "fillOpacity": 60,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" |~ \"git \" [$__auto]))",
+              "legendFormat": "git commands",
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" |~ \"(Set-Content|Out-File|Add-Content|apply_patch)\" [$__auto]))",
+              "legendFormat": "file edits",
+              "refId": "B"
+            }
+          ]
+        },
+        {
+          "id": 45,
+          "type": "timeseries",
+          "title": "Prompts Per Hour",
+          "description": "User prompts submitted per hour (codex.user_prompt). Peaks show concentrated interaction.",
+          "gridPos": {
+            "x": 0,
+            "y": 40,
+            "w": 24,
+            "h": 5
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "green"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 15,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.user_prompt\" [$__auto]))",
+              "legendFormat": "Prompts",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 203,
+          "type": "row",
+          "title": "🛠️ Tools, MCP & Skills",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 45,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 30,
+          "type": "piechart",
+          "title": "Tool Usage Breakdown",
+          "description": "Share of tool calls by tool name (codex.tool_result). shell_command dominating is typical for coding work.",
+          "gridPos": {
+            "x": 0,
+            "y": 46,
+            "w": 8,
+            "h": 8
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "pieType": "donut",
+            "displayLabels": [
+              "percent",
+              "name"
+            ],
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum by (attributes_tool_name) (count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" [$__range]))",
+              "legendFormat": "{{attributes_tool_name}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 31,
+          "type": "piechart",
+          "title": "Tool Decision Outcomes",
+          "description": "How tool executions were authorized (codex.tool_decision): approved / denied / ask. A high denied/ask share means Codex is hitting approval friction.",
+          "gridPos": {
+            "x": 8,
+            "y": 46,
+            "w": 8,
+            "h": 8
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "pieType": "donut",
+            "displayLabels": [
+              "percent",
+              "name"
+            ],
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum by (attributes_decision) (count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_decision\" [$__range]))",
+              "legendFormat": "{{attributes_decision}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 32,
+          "type": "piechart",
+          "title": "Decision Source",
+          "description": "What authorized each tool decision (codex.tool_decision source): Config (approval policy), or interactive user approval.",
+          "gridPos": {
+            "x": 16,
+            "y": 46,
+            "w": 8,
+            "h": 8
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "pieType": "donut",
+            "displayLabels": [
+              "percent",
+              "name"
+            ],
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum by (attributes_source) (count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_decision\" [$__range]))",
+              "legendFormat": "{{attributes_source}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 33,
+          "type": "timeseries",
+          "title": "Tool Calls Over Time — by Tool",
+          "description": "Tool call volume per hour, split by tool name. Bursts of shell_command track active build/test cycles.",
+          "gridPos": {
+            "x": 0,
+            "y": 54,
+            "w": 14,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "bars",
+                "lineWidth": 1,
+                "fillOpacity": 70,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "normal",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum by (attributes_tool_name) (count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" [$__auto]))",
+              "legendFormat": "{{attributes_tool_name}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 34,
+          "type": "bargauge",
+          "title": "MCP Server Attribution — Tool Calls",
+          "description": "Tool calls attributed to an MCP server (codex.tool_result mcp_server, non-empty). Built-in tools (shell, file) have no mcp_server and are excluded.",
+          "gridPos": {
+            "x": 14,
+            "y": 54,
+            "w": 10,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "valueMode": "color",
+            "showUnfilled": true,
+            "minVizWidth": 0,
+            "minVizHeight": 10
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "continuous-BlPu"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              },
+              "mappings": [],
+              "noValue": "No MCP tool calls"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum by (attributes_mcp_server) (count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" | attributes_mcp_server!=\"\" [$__range]))",
+              "legendFormat": "{{attributes_mcp_server}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 70,
+          "type": "table",
+          "title": "Most Used Tools",
+          "description": "Per-tool breakdown over the selected range: uses, average duration, and success rate. Sourced from codex.tool_result, joined on tool_name.",
+          "gridPos": {
+            "x": 0,
+            "y": 60,
+            "w": 14,
+            "h": 8
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "filterable": true
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Success %"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "percent"
+                  },
+                  {
+                    "id": "custom.cellOptions",
+                    "value": {
+                      "type": "color-background"
+                    }
+                  },
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "red",
+                          "value": null
+                        },
+                        {
+                          "color": "yellow",
+                          "value": 70
+                        },
+                        {
+                          "color": "green",
+                          "value": 85
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Avg Duration (ms)"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "ms"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "transformations": [
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "attributes_tool_name",
+                "mode": "outer"
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "renameByName": {
+                  "attributes_tool_name": "Tool",
+                  "Value #uses": "Uses",
+                  "Value #avgdur": "Avg Duration (ms)",
+                  "Value #succ": "Success %"
+                },
+                "indexByName": {
+                  "attributes_tool_name": 0,
+                  "Value #uses": 1,
+                  "Value #avgdur": 2,
+                  "Value #succ": 3
+                },
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ],
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "uses",
+              "format": "table",
+              "instant": true,
+              "expr": "sum by(attributes_tool_name)(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" [$__range]))"
+            },
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "avgdur",
+              "format": "table",
+              "instant": true,
+              "expr": "avg_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" | unwrap attributes_duration_ms [$__range]) by (attributes_tool_name)"
+            },
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "succ",
+              "format": "table",
+              "instant": true,
+              "expr": "sum by(attributes_tool_name)(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" | attributes_success=\"true\" [$__range])) / sum by(attributes_tool_name)(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" [$__range])) * 100"
+            }
+          ]
+        },
+        {
+          "id": 71,
+          "type": "bargauge",
+          "title": "Tool Success Rate by Tool",
+          "description": "Success rate (success=\"true\") per tool over the selected range. Surfaces which specific tools are failing. Red below 70%, yellow to 85%, green above.",
+          "gridPos": {
+            "x": 14,
+            "y": 60,
+            "w": 10,
+            "h": 8
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "valueMode": "color",
+            "showUnfilled": true,
+            "minVizWidth": 0,
+            "minVizHeight": 10
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 1,
+              "min": 0,
+              "max": 100,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 70
+                  },
+                  {
+                    "color": "green",
+                    "value": 85
+                  }
+                ]
+              },
+              "mappings": [],
+              "noValue": "No tools"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "A",
+              "instant": true,
+              "expr": "sum by(attributes_tool_name)(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" | attributes_success=\"true\" [$__range])) / sum by(attributes_tool_name)(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" [$__range])) * 100",
+              "legendFormat": "{{attributes_tool_name}}"
+            }
+          ]
+        },
+        {
+          "id": 202,
+          "type": "row",
+          "title": "⚡ Performance",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 68,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 20,
+          "type": "bargauge",
+          "title": "p95 Turn Latency by Model (ms)",
+          "description": "95th percentile WebSocket round-trip (websocket_event duration_ms) grouped by model. Codex uses WebSocket transport, so this is the available latency signal. Yellow at 5s, red at 15s.",
+          "gridPos": {
+            "x": 0,
+            "y": 79,
+            "w": 12,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "valueMode": "color",
+            "showUnfilled": true,
+            "minVizWidth": 0,
+            "minVizHeight": 10
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "decimals": 0,
+              "color": {
+                "mode": "continuous-GrYlRd"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 5000
+                  },
+                  {
+                    "color": "red",
+                    "value": 15000
+                  }
+                ]
+              },
+              "mappings": [],
+              "noValue": "No data"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "quantile_over_time(0.95, {service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.websocket_event\" | unwrap attributes_duration_ms [$__range]) by (attributes_model)",
+              "legendFormat": "{{attributes_model}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "type": "timeseries",
+          "title": "Avg Turn Latency Over Time — by Model",
+          "description": "Average WebSocket round-trip duration per hour by model. Rising latency can indicate larger context or server backpressure.",
+          "gridPos": {
+            "x": 12,
+            "y": 79,
+            "w": 12,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "decimals": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "avg_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.websocket_event\" | unwrap attributes_duration_ms [$__auto]) by (attributes_model)",
+              "legendFormat": "{{attributes_model}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 22,
+          "type": "stat",
+          "title": "Transport Errors",
+          "description": "Count of WebSocket events with success=\"false\" — failed transport round-trips. Green at zero; any failures turn it yellow, 5+ red.",
+          "gridPos": {
+            "x": 0,
+            "y": 85,
+            "w": 8,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=~\"codex.websocket_event|codex.websocket_request\" | attributes_success=\"false\" [$__range]))",
+              "legendFormat": "Errors",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 23,
+          "type": "timeseries",
+          "title": "WebSocket Round-Trip Rate (events/min)",
+          "description": "WebSocket event throughput per minute — a measure of how chatty Codex's transport is. Spikes track active generation.",
+          "gridPos": {
+            "x": 8,
+            "y": 85,
+            "w": 16,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "green"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 15,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.websocket_event\" [$__auto]))",
+              "legendFormat": "WS events/min",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 80,
+          "type": "stat",
+          "title": "Avg TTFT (ms)",
+          "description": "Average time to first token (codex.turn_ttft duration_ms) over the selected range. Green < 5s, yellow < 15s, red above.",
+          "gridPos": {
+            "x": 0,
+            "y": 69,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "decimals": 0,
+              "mappings": [],
+              "noValue": "No data",
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 5000
+                  },
+                  {
+                    "color": "red",
+                    "value": 15000
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "A",
+              "instant": true,
+              "expr": "avg_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.turn_ttft\" | unwrap attributes_duration_ms [$__range])",
+              "legendFormat": "Avg TTFT (ms)"
+            }
+          ]
+        },
+        {
+          "id": 81,
+          "type": "stat",
+          "title": "p95 API Latency (TTFT)",
+          "description": "Average API request round-trip (codex.api_request duration_ms, real model requests) over the selected range. Green < 30s, yellow < 90s, red above.",
+          "gridPos": {
+            "x": 6,
+            "y": 69,
+            "w": 6,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "decimals": 0,
+              "mappings": [],
+              "noValue": "No data",
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 30000
+                  },
+                  {
+                    "color": "red",
+                    "value": 90000
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "A",
+              "instant": true,
+              "expr": "max(quantile_over_time(0.95, {service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.turn_ttft\" | __error__=\"\" | unwrap attributes_duration_ms [$__range]))",
+              "legendFormat": "p95 API Latency"
+            }
+          ]
+        },
+        {
+          "id": 82,
+          "type": "bargauge",
+          "title": "p95 API Latency by Model (TTFT)",
+          "description": "95th percentile API request round-trip duration by model (codex.api_request). This is the full HTTP round-trip to OpenAI's Responses endpoint, complementary to the WebSocket transport latency above.",
+          "gridPos": {
+            "x": 12,
+            "y": 69,
+            "w": 12,
+            "h": 4
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "valueMode": "color",
+            "showUnfilled": true,
+            "minVizWidth": 0,
+            "minVizHeight": 10
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "decimals": 0,
+              "color": {
+                "mode": "continuous-GrYlRd"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 30000
+                  },
+                  {
+                    "color": "red",
+                    "value": 90000
+                  }
+                ]
+              },
+              "mappings": [],
+              "noValue": "No data"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "A",
+              "instant": true,
+              "legendFormat": "{{attributes_model}}",
+              "expr": "quantile_over_time(0.95, {service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.turn_ttft\" | __error__=\"\" | unwrap attributes_duration_ms [$__range]) by (attributes_model)"
+            }
+          ]
+        },
+        {
+          "id": 83,
+          "type": "timeseries",
+          "title": "p95 API Latency Over Time — by Model (TTFT)",
+          "description": "Average API request round-trip per hour by model (codex.api_request). Rising latency can indicate larger context or server-side slowdowns.",
+          "gridPos": {
+            "x": 0,
+            "y": 73,
+            "w": 12,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "decimals": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "A",
+              "legendFormat": "{{attributes_model}}",
+              "expr": "quantile_over_time(0.95, {service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.turn_ttft\" | __error__=\"\" | unwrap attributes_duration_ms [$__auto]) by (attributes_model)"
+            }
+          ]
+        },
+        {
+          "id": 84,
+          "type": "timeseries",
+          "title": "TTFT Over Time — by Model",
+          "description": "Average time to first token per hour by model (codex.turn_ttft). How quickly the model starts responding.",
+          "gridPos": {
+            "x": 12,
+            "y": 73,
+            "w": 12,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "decimals": 0,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "A",
+              "legendFormat": "{{attributes_model}}",
+              "expr": "avg_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.turn_ttft\" | unwrap attributes_duration_ms [$__auto]) by (attributes_model)"
+            }
+          ]
+        },
+        {
+          "id": 85,
+          "type": "table",
+          "title": "API Request Errors — HTTP Status",
+          "description": "Count of non-200 API responses by HTTP status code (codex.api_request). Empty is healthy.",
+          "gridPos": {
+            "x": 0,
+            "y": 89,
+            "w": 12,
+            "h": 5
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "filterable": true
+              }
+            },
+            "overrides": []
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "renameByName": {
+                  "attributes_http_response_status_code": "HTTP Status",
+                  "Value": "Error Count"
+                },
+                "excludeByName": {
+                  "Time": true
+                }
+              }
+            }
+          ],
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "A",
+              "format": "table",
+              "instant": true,
+              "expr": "sum by (attributes_http_response_status_code)(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.api_request\" | attributes_http_response_status_code!=\"200\" [$__range]))"
+            }
+          ]
+        },
+        {
+          "id": 86,
+          "type": "stat",
+          "title": "API Requests (Responses)",
+          "description": "Count of real API requests over the selected range (codex.api_request with a model set, excludes /models housekeeping calls).",
+          "gridPos": {
+            "x": 12,
+            "y": 89,
+            "w": 12,
+            "h": 5
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "mappings": [],
+              "noValue": "No data",
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "blue"
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "A",
+              "instant": true,
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.websocket_request\" [$__range]))",
+              "legendFormat": "API Requests"
+            }
+          ]
+        },
+        {
+          "id": 90,
+          "type": "bargauge",
+          "title": "Trace: p95 Operation Latency by Span",
+          "description": "95th percentile latency per Codex operation, derived from trace spans (Tempo span metrics in Prometheus). Shows where time goes inside a turn — model sampling, websocket round-trips, tool discovery, etc. Sourced from codex_exec and the desktop app's traces. Populates under sustained usage; a single one-off turn may not have enough samples for a percentile.",
+          "gridPos": {
+            "x": 0,
+            "y": 95,
+            "w": 12,
+            "h": 7
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "valueMode": "color",
+            "showUnfilled": true,
+            "minVizWidth": 0,
+            "minVizHeight": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "decimals": 0,
+              "color": {
+                "mode": "continuous-GrYlRd"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 2000
+                  },
+                  {
+                    "color": "red",
+                    "value": 10000
+                  }
+                ]
+              },
+              "mappings": [],
+              "noValue": "No trace data in range"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "refId": "A",
+              "instant": true,
+              "expr": "sort_desc(histogram_quantile(0.95, sum by (span_name, le)(rate(traces_spanmetrics_latency_bucket{service=~\"codex.*\"}[$__range]))) * 1000 < +Inf)",
+              "legendFormat": "{{span_name}}"
+            }
+          ]
+        },
+        {
+          "id": 91,
+          "type": "bargauge",
+          "title": "Trace: Avg Operation Latency by Span",
+          "description": "Average latency per Codex operation from trace span metrics (sum/count). Complements the p95 view and is available even from a single turn.",
+          "gridPos": {
+            "x": 12,
+            "y": 95,
+            "w": 12,
+            "h": 7
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "valueMode": "color",
+            "showUnfilled": true,
+            "minVizWidth": 0,
+            "minVizHeight": 8
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "decimals": 0,
+              "color": {
+                "mode": "continuous-BlPu"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              },
+              "mappings": [],
+              "noValue": "No trace data in range"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "refId": "A",
+              "instant": true,
+              "expr": "sort_desc(sum by (span_name)(increase(traces_spanmetrics_latency_sum{service=~\"codex.*\"}[$__range])) / (sum by (span_name)(increase(traces_spanmetrics_latency_count{service=~\"codex.*\"}[$__range])) > 0) * 1000)",
+              "legendFormat": "{{span_name}}"
+            }
+          ]
+        },
+        {
+          "id": 92,
+          "type": "timeseries",
+          "title": "Trace: Operation Call Rate by Span",
+          "description": "Per-operation call rate from trace span metrics (traces_spanmetrics_calls_total). Shows which Codex operations run most and when.",
+          "gridPos": {
+            "x": 0,
+            "y": 102,
+            "w": 12,
+            "h": 6
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 2,
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "refId": "A",
+              "legendFormat": "{{span_name}}",
+              "expr": "sum by (span_name)(rate(traces_spanmetrics_calls_total{service=~\"codex.*\"}[$__rate_interval]))"
+            }
+          ]
+        },
+        {
+          "id": 93,
+          "type": "timeseries",
+          "title": "Trace: End-to-End Turn Duration",
+          "description": "Average duration of the run_turn span over time — the full end-to-end time for one Codex conversation turn, derived from traces. Complements TTFT (first-token): this is the total turn time. Works from CLI traces, no desktop dependency.",
+          "gridPos": {
+            "x": 12,
+            "y": 102,
+            "w": 12,
+            "h": 6
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "ms",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "orange"
+              },
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 2,
+                "fillOpacity": 15,
+                "showPoints": "auto",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "refId": "A",
+              "legendFormat": "turn duration (avg)",
+              "expr": "sum(rate(traces_spanmetrics_latency_sum{service=~\"codex.*\",span_name=\"run_turn\"}[$__rate_interval])) / (sum(rate(traces_spanmetrics_latency_count{service=~\"codex.*\",span_name=\"run_turn\"}[$__rate_interval])) > 0) * 1000"
+            }
+          ]
+        },
+        {
+          "id": 204,
+          "type": "row",
+          "title": "💬 Sessions & Conversations",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 107,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 40,
+          "type": "piechart",
+          "title": "Conversations by Model",
+          "description": "Distribution of conversations by model (codex.conversation_starts model).",
+          "gridPos": {
+            "x": 0,
+            "y": 108,
+            "w": 6,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "pieType": "pie",
+            "displayLabels": [
+              "percent",
+              "name"
+            ],
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum by (attributes_model) (count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.conversation_starts\" [$__range]))",
+              "legendFormat": "{{attributes_model}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 41,
+          "type": "piechart",
+          "title": "Conversations by Approval Policy",
+          "description": "Split of conversations by approval_policy (never / on-request / on-failure / untrusted).",
+          "gridPos": {
+            "x": 6,
+            "y": 108,
+            "w": 6,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "pieType": "pie",
+            "displayLabels": [
+              "percent",
+              "name"
+            ],
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum by (attributes_approval_policy) (count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.conversation_starts\" [$__range]))",
+              "legendFormat": "{{attributes_approval_policy}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 42,
+          "type": "piechart",
+          "title": "Conversations by Surface",
+          "description": "CLI (codex_exec) vs desktop app (codex-app-server) conversation share.",
+          "gridPos": {
+            "x": 12,
+            "y": 108,
+            "w": 6,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "pieType": "pie",
+            "displayLabels": [
+              "percent",
+              "name"
+            ],
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum by (service_name) (count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.conversation_starts\" [$__range]))",
+              "legendFormat": "{{service_name}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 43,
+          "type": "bargauge",
+          "title": "Conversations by Reasoning Effort",
+          "description": "Distribution of conversations by reasoning_effort (low / medium / high / xhigh). A heavy xhigh share drives up reasoning-token usage.",
+          "gridPos": {
+            "x": 18,
+            "y": 108,
+            "w": 6,
+            "h": 6
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "displayMode": "gradient",
+            "valueMode": "color",
+            "showUnfilled": true,
+            "minVizWidth": 0,
+            "minVizHeight": 10
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "continuous-BlPu"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "text",
+                    "value": null
+                  }
+                ]
+              },
+              "mappings": [],
+              "noValue": "No data"
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum by (attributes_reasoning_effort) (count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.conversation_starts\" [$__range]))",
+              "legendFormat": "{{attributes_reasoning_effort}}",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 44,
+          "type": "timeseries",
+          "title": "New Conversations Over Time",
+          "description": "New Codex conversations started per hour across both surfaces.",
+          "gridPos": {
+            "x": 0,
+            "y": 114,
+            "w": 24,
+            "h": 5
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            },
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 0,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "blue"
+              },
+              "custom": {
+                "drawStyle": "bars",
+                "lineWidth": 1,
+                "fillOpacity": 70,
+                "showPoints": "never",
+                "stacking": {
+                  "mode": "none",
+                  "group": "A"
+                },
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.conversation_starts\" [$__auto]))",
+              "legendFormat": "Conversations",
+              "refId": "A"
+            }
+          ]
+        },
+        {
+          "id": 72,
+          "type": "piechart",
+          "title": "Conversations by Originator",
+          "description": "What launched each conversation (codex.conversation_starts originator). 'Claude_Code' means Claude Code spawned Codex; 'codex_exec' is the CLI used directly. Useful for spotting agent-to-agent orchestration.",
+          "gridPos": {
+            "x": 0,
+            "y": 119,
+            "w": 8,
+            "h": 5
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "pieType": "pie",
+            "displayLabels": [
+              "percent",
+              "name"
+            ],
+            "legend": {
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            },
+            "overrides": []
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "A",
+              "instant": false,
+              "expr": "sum by(attributes_originator)(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.conversation_starts\" [$__range]))",
+              "legendFormat": "{{attributes_originator}}"
+            }
+          ]
+        },
+        {
+          "id": 73,
+          "type": "stat",
+          "title": "Avg Session Metrics",
+          "description": "Average tool calls per conversation (total tool_result events divided by distinct conversations that used tools) and the count of those conversations, over the selected range.",
+          "gridPos": {
+            "x": 8,
+            "y": 119,
+            "w": 16,
+            "h": 5
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "reduceOptions": {
+              "values": false,
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": ""
+            },
+            "orientation": "horizontal",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short",
+              "decimals": 1,
+              "color": {
+                "mode": "fixed",
+                "fixedColor": "blue"
+              },
+              "mappings": [],
+              "noValue": "0"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byFrameRefId",
+                  "options": "A"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Avg Tool Calls / Conversation"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byFrameRefId",
+                  "options": "B"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Conversations w/ Tools"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 0
+                  },
+                  {
+                    "id": "color",
+                    "value": {
+                      "mode": "fixed",
+                      "fixedColor": "purple"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "A",
+              "instant": true,
+              "legendFormat": "Avg Tool Calls / Conversation",
+              "expr": "sum(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" [$__range])) / count(count by(attributes_conversation_id)(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" [$__range])))"
+            },
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "refId": "B",
+              "instant": true,
+              "legendFormat": "Conversations w/ Tools",
+              "expr": "count(count by(attributes_conversation_id)(count_over_time({service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name=\"codex.tool_result\" [$__range])))"
+            }
+          ]
+        },
+        {
+          "id": 205,
+          "type": "row",
+          "title": "📜 Live Event Feed",
+          "collapsed": false,
+          "gridPos": {
+            "x": 0,
+            "y": 124,
+            "w": 24,
+            "h": 1
+          },
+          "panels": []
+        },
+        {
+          "id": 50,
+          "type": "logs",
+          "title": "Codex Event Stream",
+          "description": "Raw Codex log stream (both surfaces), excluding high-volume websocket noise. Click a line to expand the full structured payload.",
+          "gridPos": {
+            "x": 0,
+            "y": 125,
+            "w": 24,
+            "h": 10
+          },
+          "datasource": {
+            "type": "loki",
+            "uid": "${loki_datasource}"
+          },
+          "options": {
+            "showTime": true,
+            "showLabels": false,
+            "showCommonLabels": false,
+            "wrapLogMessage": true,
+            "prettifyLogMessage": true,
+            "enableLogDetails": true,
+            "dedupStrategy": "none",
+            "sortOrder": "Descending"
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "loki",
+                "uid": "${loki_datasource}"
+              },
+              "expr": "{service_name=~\"codex-app-server|codex_exec\"} | json | attributes_event_name!=\"codex.websocket_event\" | attributes_event_name!=\"codex.websocket_request\"",
+              "refId": "A"
+            }
+          ]
+        }
+      ]
+    }
