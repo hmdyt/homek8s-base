@@ -177,6 +177,25 @@ spec:
               }
 
               // =============================================================================
+              // Proxmox Hosts (node_exporter on physical hosts)
+              // =============================================================================
+              prometheus.scrape "proxmox" {
+                targets = [
+                  {"__address__" = "192.168.0.50:9100", "instance" = "curry", "cluster" = "proxmox"},
+                  {"__address__" = "192.168.0.51:9100", "instance" = "sushi", "cluster" = "proxmox"},
+                  {"__address__" = "192.168.0.52:9100", "instance" = "steak", "cluster" = "proxmox"},
+                  // beans (192.168.0.53) はディスク故障でオフライン。復帰したら有効化
+                  // {"__address__" = "192.168.0.53:9100", "instance" = "beans", "cluster" = "proxmox"},
+                  {"__address__" = "192.168.0.54:9100", "instance" = "gyoza", "cluster" = "proxmox"},
+                  {"__address__" = "192.168.0.55:9100", "instance" = "apple", "cluster" = "proxmox"},
+                  {"__address__" = "192.168.0.56:9100", "instance" = "pizza", "cluster" = "proxmox"},
+                ]
+                forward_to = [prometheus.remote_write.mimir.receiver]
+                job_name = "proxmox-node"
+                scrape_interval = "30s"
+              }
+
+              // =============================================================================
               // Prometheus Remote Write (Mimir)
               // =============================================================================
               prometheus.remote_write "mimir" {
