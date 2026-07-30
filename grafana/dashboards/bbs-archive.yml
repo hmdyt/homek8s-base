@@ -1,0 +1,74 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: bbs-archive
+  namespace: grafana
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  json: |-
+    {
+      "uid": "bbs-archive",
+      "title": "bbs-archive",
+      "tags": ["bbs-archive"],
+      "timezone": "browser",
+      "time": {"from": "now-6h", "to": "now"},
+      "refresh": "1m",
+      "panels": [
+        {
+          "id": 1, "type": "stat", "title": "Posts upserted (rate)",
+          "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+          "datasource": {"type": "prometheus", "uid": "mimir"},
+          "targets": [{"expr": "sum(rate(bbs_posts_upserted_total{job=\"bbs-crawler\"}[5m]))", "legendFormat": "upsert/s"}]
+        },
+        {
+          "id": 2, "type": "stat", "title": "Posts deleted on source (rate)",
+          "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+          "datasource": {"type": "prometheus", "uid": "mimir"},
+          "targets": [{"expr": "sum(rate(bbs_posts_deleted_total{job=\"bbs-crawler\"}[5m]))", "legendFormat": "del/s"}]
+        },
+        {
+          "id": 3, "type": "stat", "title": "Fetch errors (rate)",
+          "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+          "datasource": {"type": "prometheus", "uid": "mimir"},
+          "targets": [{"expr": "sum(rate(bbs_fetch_errors_total{job=\"bbs-crawler\"}[5m]))", "legendFormat": "err/s"}]
+        },
+        {
+          "id": 4, "type": "stat", "title": "Mirror success (rate)",
+          "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+          "datasource": {"type": "prometheus", "uid": "mimir"},
+          "targets": [{"expr": "sum(rate(bbs_mirror_total{job=\"bbs-crawler\",outcome=\"success\"}[5m]))", "legendFormat": "ok/s"}]
+        },
+        {
+          "id": 5, "type": "timeseries", "title": "Discovery cycle duration",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+          "datasource": {"type": "prometheus", "uid": "mimir"},
+          "targets": [{"expr": "histogram_quantile(0.95, sum(rate(bbs_crawl_cycle_duration_seconds_bucket{job=\"bbs-crawler\"}[5m])) by (le, board))", "legendFormat": "{{board}} p95"}]
+        },
+        {
+          "id": 6, "type": "timeseries", "title": "Threads fetched by reason",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+          "datasource": {"type": "prometheus", "uid": "mimir"},
+          "targets": [{"expr": "sum(rate(bbs_threads_fetched_total{job=\"bbs-crawler\"}[5m])) by (reason)", "legendFormat": "{{reason}}"}]
+        },
+        {
+          "id": 7, "type": "timeseries", "title": "External URLs detected (by host)",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+          "datasource": {"type": "prometheus", "uid": "mimir"},
+          "targets": [{"expr": "sum(rate(bbs_urls_detected_total{job=\"bbs-crawler\"}[5m])) by (host)", "legendFormat": "{{host}}"}]
+        },
+        {
+          "id": 8, "type": "timeseries", "title": "Error log rate (Loki)",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+          "datasource": {"type": "loki", "uid": "loki"},
+          "targets": [{"expr": "sum(count_over_time({job=~\"bbs-.*\"} | json | level=\"error\" [5m])) by (job)", "legendFormat": "{{job}}"}]
+        },
+        {
+          "id": 9, "type": "table", "title": "Trace error rate by service (spanmetrics)",
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 20},
+          "datasource": {"type": "prometheus", "uid": "mimir"},
+          "targets": [{"expr": "sum(rate(traces_spanmetrics_calls_total{service_name=~\"bbs-.*\",status_code=\"STATUS_CODE_ERROR\"}[5m])) by (service_name)", "legendFormat": "{{service_name}}"}]
+        }
+      ]
+    }
