@@ -1,0 +1,50 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: infra-alerts
+  namespace: mimir
+spec:
+  groups:
+    - name: infra_down
+      rules:
+        # NOTE: このアラートは Mimir ruler 上で評価される。ruler 自体が pizza 上の VM で
+        # 動いているため、pizza が落ちた場合は発報できない（自己監視の限界）。
+        # pizza の死活は Grafana Cloud 側のアラートで監視すること。
+        - alert: ProxmoxHostDown
+          expr: up{job="proxmox-node"} == 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Proxmox host {{ $labels.instance }} is down"
+            description: "{{ $labels.instance }} has been unreachable for more than 10 minutes"
+
+        - alert: IpmiTargetDown
+          expr: up{job="ipmi"} == 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: "iRMC scrape failing for {{ $labels.instance }}"
+            description: "ipmi_exporter has not been able to scrape {{ $labels.instance }} for 15 minutes"
+
+    - name: infra_thermal
+      rules:
+        - alert: CpuPackageTempHigh
+          expr: node_hwmon_temp_celsius{chip="coretemp", sensor="Package id 0"} > 85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "CPU package temperature high on {{ $labels.node }}"
+            description: "{{ $value | printf \"%.1f\" }}°C for more than 5 minutes"
+
+        - alert: FanSpeedLow
+          # FAN PSU1 は電源ユニット未接続のため常時 0 RPM。除外する。
+          expr: ipmi_fan_speed_rpm{sensor!="FAN PSU1"} > 0 and ipmi_fan_speed_rpm{sensor!="FAN PSU1"} < 600
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Fan {{ $labels.sensor }} rotating slowly on {{ $labels.instance }}"
+            description: "{{ $value }} RPM for more than 10 minutes"
