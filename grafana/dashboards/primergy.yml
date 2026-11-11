@@ -1,0 +1,152 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: primergy01
+  namespace: grafana
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  json: >
+    {
+      "title": "PRIMERGY TX2540 M1 (primergy01)",
+      "uid": "primergy01",
+      "tags": ["primergy", "hardware", "ipmi"],
+      "timezone": "browser",
+      "editable": true,
+      "schemaVersion": 39,
+      "refresh": "1m",
+      "time": { "from": "now-6h", "to": "now" },
+      "templating": { "list": [] },
+      "annotations": { "list": [] },
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "ファン回転数 (RPM)",
+          "datasource": { "type": "prometheus", "uid": "mimir" },
+          "gridPos": { "h": 9, "w": 12, "x": 0, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "rotrpm",
+              "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 10, "showPoints": "never" }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "mimir" },
+              "expr": "ipmi_fan_speed_rpm{instance=\"primergy01\"}",
+              "legendFormat": "{{sensor}}"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "timeseries",
+          "title": "CPU 温度 (°C)",
+          "datasource": { "type": "prometheus", "uid": "mimir" },
+          "gridPos": { "h": 9, "w": 12, "x": 12, "y": 0 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "min": 0,
+              "max": 100,
+              "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 10, "showPoints": "never" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 75 },
+                  { "color": "red", "value": 85 }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "mimir" },
+              "expr": "node_hwmon_temp_celsius{node=\"primergy01\", chip=\"coretemp\"}",
+              "legendFormat": "{{sensor}}"
+            },
+            {
+              "refId": "B",
+              "datasource": { "type": "prometheus", "uid": "mimir" },
+              "expr": "ipmi_temperature_celsius{instance=\"primergy01\"}",
+              "legendFormat": "BMC: {{sensor}}"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "CPU 使用率 (%)",
+          "datasource": { "type": "prometheus", "uid": "mimir" },
+          "gridPos": { "h": 9, "w": 12, "x": 0, "y": 9 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 20, "showPoints": "never", "stacking": { "mode": "none" } }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": { "displayMode": "list", "placement": "bottom" },
+            "tooltip": { "mode": "single" }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "mimir" },
+              "expr": "100 - (avg(rate(node_cpu_seconds_total{node=\"primergy01\", mode=\"idle\"}[5m])) * 100)",
+              "legendFormat": "使用率"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "timeseries",
+          "title": "メモリ使用量 (GiB)",
+          "datasource": { "type": "prometheus", "uid": "mimir" },
+          "gridPos": { "h": 9, "w": 12, "x": 12, "y": 9 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes",
+              "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 10, "showPoints": "never" }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] },
+            "tooltip": { "mode": "multi" }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "mimir" },
+              "expr": "node_memory_MemTotal_bytes{node=\"primergy01\"} - node_memory_MemAvailable_bytes{node=\"primergy01\"}",
+              "legendFormat": "使用中"
+            },
+            {
+              "refId": "B",
+              "datasource": { "type": "prometheus", "uid": "mimir" },
+              "expr": "node_memory_MemTotal_bytes{node=\"primergy01\"}",
+              "legendFormat": "搭載"
+            }
+          ]
+        }
+      ]
+    }

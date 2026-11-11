@@ -57,7 +57,7 @@ spec:
               // Node Exporter
               // =============================================================================
               prometheus.exporter.unix "node" {
-                set_collectors = ["cpu", "diskstats", "filesystem", "loadavg", "meminfo", "netdev", "stat", "uname"]
+                set_collectors = ["cpu", "diskstats", "filesystem", "loadavg", "meminfo", "netdev", "stat", "uname", "hwmon"]
                 rootfs_path = "/host/root"
                 sysfs_path = "/host/sys"
                 procfs_path = "/host/proc"
@@ -193,6 +193,26 @@ spec:
                 forward_to = [prometheus.remote_write.mimir.receiver]
                 job_name = "proxmox-node"
                 scrape_interval = "30s"
+              }
+
+              // =============================================================================
+              // IPMI (iRMC) — ファン回転数 / 温度 / 電力
+              //   ipmi_exporter が iRMC を out-of-band でスクレイプする。
+              //   SDR 取得に時間がかかるため interval/timeout を長めに取る。
+              // =============================================================================
+              prometheus.scrape "ipmi" {
+                targets = [{
+                  "__address__"      = "ipmi-exporter.observability.svc:9290",
+                  "__metrics_path__" = "/ipmi",
+                  "__param_target"   = "192.168.0.156",
+                  "__param_module"   = "default",
+                  "instance"         = "primergy01",
+                  "cluster"          = "homek8s",
+                }]
+                forward_to = [prometheus.remote_write.mimir.receiver]
+                job_name = "ipmi"
+                scrape_interval = "60s"
+                scrape_timeout = "50s"
               }
 
               // =============================================================================

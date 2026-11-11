@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ipmi-exporter
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: prometheus-ipmi-exporter
+    targetRevision: "0.8.2"
+    helm:
+      valuesObject:
+        # iRMC の認証情報は SealedSecret (ipmi-exporter-config) から読む
+        configSecret:
+          enabled: true
+          name: ipmi-exporter-config
+          key: config.yml
+        service:
+          type: ClusterIP
+          port: 9290
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
