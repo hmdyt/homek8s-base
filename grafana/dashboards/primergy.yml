@@ -42,7 +42,7 @@ spec:
               "refId": "A",
               "datasource": { "type": "prometheus", "uid": "mimir" },
               "expr": "ipmi_fan_speed_rpm{instance=\"primergy01\"}",
-              "legendFormat": "{{sensor}}"
+              "legendFormat": "{{name}}"
             }
           ]
         },
@@ -78,13 +78,13 @@ spec:
               "refId": "A",
               "datasource": { "type": "prometheus", "uid": "mimir" },
               "expr": "node_hwmon_temp_celsius{node=\"primergy01\", chip=~\".*coretemp.*\"}",
-              "legendFormat": "{{sensor}}"
+              "legendFormat": "{{name}}"
             },
             {
               "refId": "B",
               "datasource": { "type": "prometheus", "uid": "mimir" },
               "expr": "ipmi_temperature_celsius{instance=\"primergy01\"}",
-              "legendFormat": "BMC: {{sensor}}"
+              "legendFormat": "BMC: {{name}}"
             }
           ]
         },

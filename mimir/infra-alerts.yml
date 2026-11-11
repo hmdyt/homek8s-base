@@ -43,10 +43,10 @@ spec:
 
         - alert: FanSpeedLow
           # FAN PSU1 は電源ユニット未接続のため常時 0 RPM。除外する。
-          expr: ipmi_fan_speed_rpm{sensor!="FAN PSU1"} > 0 and ipmi_fan_speed_rpm{sensor!="FAN PSU1"} < 600
+          expr: ipmi_fan_speed_rpm{name!="FAN PSU1"} > 0 and ipmi_fan_speed_rpm{name!="FAN PSU1"} < 600
           for: 10m
           labels:
             severity: warning
           annotations:
-            summary: "Fan {{ $labels.sensor }} rotating slowly on {{ $labels.instance }}"
+            summary: "Fan {{ $labels.name }} rotating slowly on {{ $labels.instance }}"
             description: "{{ $value }} RPM for more than 10 minutes"
