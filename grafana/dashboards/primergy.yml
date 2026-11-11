@@ -77,7 +77,7 @@ spec:
             {
               "refId": "A",
               "datasource": { "type": "prometheus", "uid": "mimir" },
-              "expr": "node_hwmon_temp_celsius{node=\"primergy01\", chip=\"coretemp\"}",
+              "expr": "node_hwmon_temp_celsius{node=\"primergy01\", chip=~\".*coretemp.*\"}",
               "legendFormat": "{{sensor}}"
             },
             {

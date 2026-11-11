@@ -31,7 +31,9 @@ spec:
     - name: infra_thermal
       rules:
         - alert: CpuPackageTempHigh
-          expr: node_hwmon_temp_celsius{chip="coretemp", sensor="Package id 0"} > 85
+          # このカーネルでは coretemp のラベルが chip=platform_coretemp_0 / sensor=temp1..7。
+          # temp1 が Package、temp2..7 が各コア。
+          expr: node_hwmon_temp_celsius{chip=~".*coretemp.*", sensor="temp1"} > 85
           for: 5m
           labels:
             severity: warning
