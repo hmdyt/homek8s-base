@@ -11,6 +11,8 @@ spec:
     targetRevision: "0.8.2"
     helm:
       valuesObject:
+        # Service 名を ipmi-exporter に固定（Alloy のスクレイプ先と合わせる）
+        fullnameOverride: ipmi-exporter
         # iRMC の認証情報は SealedSecret (ipmi-exporter-config) から読む
         configSecret:
           enabled: true
