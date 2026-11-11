@@ -23,18 +23,18 @@ spec:
         {
           "id": 1,
           "type": "timeseries",
-          "title": "ファン回転数 (RPM)",
+          "title": "ファン回転数 (RPM) — iRMC",
           "datasource": { "type": "prometheus", "uid": "mimir" },
-          "gridPos": { "h": 9, "w": 12, "x": 0, "y": 0 },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
           "fieldConfig": {
             "defaults": {
               "unit": "rotrpm",
-              "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 10, "showPoints": "never" }
+              "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 8, "showPoints": "never" }
             },
             "overrides": []
           },
           "options": {
-            "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] },
+            "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "min", "max"] },
             "tooltip": { "mode": "multi", "sort": "desc" }
           },
           "targets": [
@@ -49,15 +49,51 @@ spec:
         {
           "id": 2,
           "type": "timeseries",
-          "title": "CPU 温度 (°C)",
+          "title": "温度 — BMC (iRMC) 11センサー",
           "datasource": { "type": "prometheus", "uid": "mimir" },
-          "gridPos": { "h": 9, "w": 12, "x": 12, "y": 0 },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 8 },
           "fieldConfig": {
             "defaults": {
               "unit": "celsius",
               "min": 0,
               "max": 100,
-              "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 10, "showPoints": "never" },
+              "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 8, "showPoints": "never" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "orange", "value": 65 },
+                  { "color": "red", "value": 80 }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "min", "max"] },
+            "tooltip": { "mode": "multi", "sort": "desc" }
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "mimir" },
+              "expr": "ipmi_temperature_celsius{instance=\"primergy01\"}",
+              "legendFormat": "{{name}}"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "温度 — OS (hwmon) Package + コア",
+          "datasource": { "type": "prometheus", "uid": "mimir" },
+          "gridPos": { "h": 10, "w": 24, "x": 0, "y": 18 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "min": 0,
+              "max": 100,
+              "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 8, "showPoints": "never" },
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -70,41 +106,41 @@ spec:
             "overrides": []
           },
           "options": {
-            "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull", "max"] },
+            "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "min", "max"] },
             "tooltip": { "mode": "multi", "sort": "desc" }
           },
           "targets": [
             {
               "refId": "A",
               "datasource": { "type": "prometheus", "uid": "mimir" },
-              "expr": "node_hwmon_temp_celsius{node=\"primergy01\", chip=~\".*coretemp.*\"}",
-              "legendFormat": "{{name}}"
+              "expr": "node_hwmon_temp_celsius{node=\"primergy01\", chip=~\".*coretemp.*\", sensor=\"temp1\"}",
+              "legendFormat": "Package"
             },
             {
               "refId": "B",
               "datasource": { "type": "prometheus", "uid": "mimir" },
-              "expr": "ipmi_temperature_celsius{instance=\"primergy01\"}",
-              "legendFormat": "BMC: {{name}}"
+              "expr": "node_hwmon_temp_celsius{node=\"primergy01\", chip=~\".*coretemp.*\", sensor!=\"temp1\"}",
+              "legendFormat": "{{sensor}}"
             }
           ]
         },
         {
-          "id": 3,
+          "id": 4,
           "type": "timeseries",
           "title": "CPU 使用率 (%)",
           "datasource": { "type": "prometheus", "uid": "mimir" },
-          "gridPos": { "h": 9, "w": 12, "x": 0, "y": 9 },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 28 },
           "fieldConfig": {
             "defaults": {
               "unit": "percent",
               "min": 0,
               "max": 100,
-              "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 20, "showPoints": "never", "stacking": { "mode": "none" } }
+              "custom": { "drawStyle": "line", "lineWidth": 1, "fillOpacity": 20, "showPoints": "never" }
             },
             "overrides": []
           },
           "options": {
-            "legend": { "displayMode": "list", "placement": "bottom" },
+            "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
             "tooltip": { "mode": "single" }
           },
           "targets": [
@@ -117,11 +153,11 @@ spec:
           ]
         },
         {
-          "id": 4,
+          "id": 5,
           "type": "timeseries",
-          "title": "メモリ使用量 (GiB)",
+          "title": "メモリ (GiB)",
           "datasource": { "type": "prometheus", "uid": "mimir" },
-          "gridPos": { "h": 9, "w": 12, "x": 12, "y": 9 },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 36 },
           "fieldConfig": {
             "defaults": {
               "unit": "bytes",
@@ -130,7 +166,7 @@ spec:
             "overrides": []
           },
           "options": {
-            "legend": { "displayMode": "table", "placement": "bottom", "calcs": ["lastNotNull"] },
+            "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
             "tooltip": { "mode": "multi" }
           },
           "targets": [
