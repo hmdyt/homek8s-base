@@ -204,7 +204,7 @@ spec:
                 targets = [{
                   "__address__"      = "ipmi-exporter.observability.svc:9290",
                   "__metrics_path__" = "/ipmi",
-                  "__param_target"   = "192.168.0.156",
+                  "__param_target"   = "192.168.0.11",
                   "__param_module"   = "default",
                   "instance"         = "primergy01",
                   "cluster"          = "homek8s",
