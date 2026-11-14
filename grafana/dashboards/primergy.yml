@@ -16,6 +16,7 @@ spec:
       "editable": true,
       "schemaVersion": 39,
       "refresh": "1m",
+      "graphTooltip": 1,
       "time": { "from": "now-6h", "to": "now" },
       "templating": { "list": [] },
       "annotations": { "list": [] },
@@ -34,7 +35,7 @@ spec:
             "overrides": []
           },
           "options": {
-            "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "min", "max"] },
+            "legend": { "displayMode": "table", "placement": "right", "width": 240, "calcs": ["lastNotNull", "min", "max"] },
             "tooltip": { "mode": "multi", "sort": "desc" }
           },
           "targets": [
@@ -70,7 +71,7 @@ spec:
             "overrides": []
           },
           "options": {
-            "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "min", "max"] },
+            "legend": { "displayMode": "table", "placement": "right", "width": 240, "calcs": ["lastNotNull", "min", "max"] },
             "tooltip": { "mode": "multi", "sort": "desc" }
           },
           "targets": [
@@ -106,7 +107,7 @@ spec:
             "overrides": []
           },
           "options": {
-            "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "min", "max"] },
+            "legend": { "displayMode": "table", "placement": "right", "width": 240, "calcs": ["lastNotNull", "min", "max"] },
             "tooltip": { "mode": "multi", "sort": "desc" }
           },
           "targets": [
@@ -140,7 +141,7 @@ spec:
             "overrides": []
           },
           "options": {
-            "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
+            "legend": { "displayMode": "table", "placement": "right", "width": 240, "calcs": ["lastNotNull", "max"] },
             "tooltip": { "mode": "single" }
           },
           "targets": [
@@ -166,7 +167,7 @@ spec:
             "overrides": []
           },
           "options": {
-            "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] },
+            "legend": { "displayMode": "table", "placement": "right", "width": 240, "calcs": ["lastNotNull", "max"] },
             "tooltip": { "mode": "multi" }
           },
           "targets": [
