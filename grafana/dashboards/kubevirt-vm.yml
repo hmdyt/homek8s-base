@@ -4170,13 +4170,13 @@ spec:
             "description": "Used this frequency when node_cpu_frequency_hertz is not available when  BIOS/UEFI supply profil is _Static High_ Performance_ or _Maximum Performance_",
             "hide": 2,
             "name": "default_cpu_frequency_mega_hertz",
-            "query": "${VAR_DEFAULT_CPU_FREQUENCY_MEGA_HERTZ}",
+            "query": "2400",
             "skipUrlSync": true,
             "type": "constant",
             "current": {
-              "value": "${VAR_DEFAULT_CPU_FREQUENCY_MEGA_HERTZ}",
-              "text": "${VAR_DEFAULT_CPU_FREQUENCY_MEGA_HERTZ}",
-              "selected": false
+              "selected": true,
+              "text": "2400",
+              "value": "2400"
             },
             "options": [
               {
