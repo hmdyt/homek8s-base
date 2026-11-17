@@ -7,7 +7,9 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/SynologyOpenSource/synology-csi.git
-      targetRevision: main
+      # v1.4.0 の release はあるが Docker Hub に synology/synology-csi:v1.4.0 が publish されていない
+      # （Hub は v1.3.1 まで）。main を追うと ImagePullBackOff で CSI が起動しないため固定する。
+      targetRevision: v1.3.1
       path: deploy/kubernetes/v1.20
       directory:
         recurse: false
