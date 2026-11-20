@@ -1,0 +1,30 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: seaweedfs-alerts
+  namespace: mimir
+spec:
+  groups:
+    - name: seaweedfs
+      rules:
+        # The master freezes volume growth when it thinks the cluster state was
+        # lost (raft state on /tmp disappeared). While frozen the volume count
+        # can only go down, so the cluster heads for "no writable volumes".
+        - alert: SeaweedfsVolumeGrowthFrozen
+          expr: SeaweedFS_master_volume_growth_frozen > 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "SeaweedFS volume growth is frozen on {{ $labels.instance }}"
+            description: "The master detected a state loss and stopped allocating volumes. Verify the cluster inventory, then run `volume.growth.resume`. Writes will start failing once the remaining writable volumes fill up."
+        # pick_for_write_error counts allocation attempts that could not be
+        # served, i.e. the S3 gateway answering HTTP 500 "no writable volumes".
+        - alert: SeaweedfsNoWritableVolumes
+          expr: rate(SeaweedFS_master_pick_for_write_error[5m]) > 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: "SeaweedFS cannot allocate a writable volume for writes"
+            description: "Write allocations are failing ({{ $value | humanize }} per second). Check `volume.growth.frozen`, the topology Max/Free counters, and free space on the volume server."
