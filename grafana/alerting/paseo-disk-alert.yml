@@ -1,0 +1,164 @@
+# paseo（KubeVirt VM）のディスク監視。値はゲストエージェント由来の
+# kubevirt_vmi_filesystem_* で、mount_point="/" がルート（vda1）にあたる。
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaAlertRuleGroup
+metadata:
+  name: paseo-disk
+  namespace: grafana
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  folderUID: cfqfddydvx62oa
+  interval: 1m
+  rules:
+    - uid: paseo-disk-used-ratio-warning
+      title: paseo の / 使用率が 80% 超え
+      condition: C
+      noDataState: NoData
+      execErrState: Error
+      for: 10m
+      annotations:
+        summary: paseo の / が {{ $values.B }}% まで埋まっています
+        description: PVC paseo-vm-root（60Gi, iSCSI）の使用率が 80% を超えました。ビルド成果物やイメージの掃除を検討してください。
+      labels:
+        severity: warning
+      data:
+        - refId: A
+          relativeTimeRange: {from: 600, to: 0}
+          datasourceUid: mimir
+          model:
+            refId: A
+            instant: true
+            intervalMs: 1000
+            maxDataPoints: 43200
+            expr: >-
+              100 * kubevirt_vmi_filesystem_used_bytes{name="paseo", mount_point="/"}
+              / kubevirt_vmi_filesystem_capacity_bytes{name="paseo", mount_point="/"}
+        - refId: B
+          datasourceUid: __expr__
+          model: {refId: B, type: reduce, expression: A, reducer: last}
+        - refId: C
+          datasourceUid: __expr__
+          model:
+            refId: C
+            type: threshold
+            expression: B
+            conditions:
+              - type: query
+                evaluator: {type: gt, params: [80]}
+                operator: {type: and}
+                query: {params: [B]}
+                reducer: {type: last}
+    - uid: paseo-disk-used-ratio-critical
+      title: paseo の / 使用率が 90% 超え
+      condition: C
+      noDataState: NoData
+      execErrState: Error
+      for: 5m
+      annotations:
+        summary: paseo の / が {{ $values.B }}% まで埋まっています（危険）
+        description: 90% を超えました。ビルドやログ出力が失敗する直前です。早急に容量を空けてください。
+      labels:
+        severity: critical
+      data:
+        - refId: A
+          relativeTimeRange: {from: 600, to: 0}
+          datasourceUid: mimir
+          model:
+            refId: A
+            instant: true
+            intervalMs: 1000
+            maxDataPoints: 43200
+            expr: >-
+              100 * kubevirt_vmi_filesystem_used_bytes{name="paseo", mount_point="/"}
+              / kubevirt_vmi_filesystem_capacity_bytes{name="paseo", mount_point="/"}
+        - refId: B
+          datasourceUid: __expr__
+          model: {refId: B, type: reduce, expression: A, reducer: last}
+        - refId: C
+          datasourceUid: __expr__
+          model:
+            refId: C
+            type: threshold
+            expression: B
+            conditions:
+              - type: query
+                evaluator: {type: gt, params: [90]}
+                operator: {type: and}
+                query: {params: [B]}
+                reducer: {type: last}
+    - uid: paseo-disk-free-low
+      title: paseo の / の空きが 10GiB 未満
+      condition: C
+      noDataState: NoData
+      execErrState: Error
+      for: 30m
+      annotations:
+        summary: paseo の / の空きが {{ $values.B }}GiB です
+        description: 使用率ではなく絶対量での警告。60GiB のディスクでは 80% でも 11GiB 残るため、こちらも併用します。
+      labels:
+        severity: warning
+      data:
+        - refId: A
+          relativeTimeRange: {from: 600, to: 0}
+          datasourceUid: mimir
+          model:
+            refId: A
+            instant: true
+            intervalMs: 1000
+            maxDataPoints: 43200
+            expr: >-
+              (kubevirt_vmi_filesystem_capacity_bytes{name="paseo", mount_point="/"}
+              - kubevirt_vmi_filesystem_used_bytes{name="paseo", mount_point="/"}) / 1073741824
+        - refId: B
+          datasourceUid: __expr__
+          model: {refId: B, type: reduce, expression: A, reducer: last}
+        - refId: C
+          datasourceUid: __expr__
+          model:
+            refId: C
+            type: threshold
+            expression: B
+            conditions:
+              - type: query
+                evaluator: {type: lt, params: [10]}
+                operator: {type: and}
+                query: {params: [B]}
+                reducer: {type: last}
+    - uid: paseo-disk-metric-missing
+      title: paseo のディスク指標が取れていない
+      condition: C
+      noDataState: Alerting
+      execErrState: Alerting
+      for: 15m
+      annotations:
+        summary: paseo のディスク指標が取れていません
+        description: ゲストエージェントが止まったか、マウント構成が変わって mount_point="/" が消えた可能性があります。アラートが「出ない」状態に陥っていないか確認してください。
+      labels:
+        severity: warning
+      data:
+        - refId: A
+          relativeTimeRange: {from: 900, to: 0}
+          datasourceUid: mimir
+          model:
+            refId: A
+            instant: true
+            intervalMs: 1000
+            maxDataPoints: 43200
+            expr: kubevirt_vmi_filesystem_used_bytes{name="paseo", mount_point="/"}
+        - refId: B
+          datasourceUid: __expr__
+          model: {refId: B, type: reduce, expression: A, reducer: last}
+        - refId: C
+          datasourceUid: __expr__
+          model:
+            refId: C
+            type: threshold
+            expression: B
+            conditions:
+              - type: query
+                evaluator: {type: lt, params: [0]}
+                operator: {type: and}
+                query: {params: [B]}
+                reducer: {type: last}

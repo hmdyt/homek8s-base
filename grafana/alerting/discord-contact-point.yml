@@ -1,0 +1,21 @@
+# Discord への通知先。Webhook の URL は既存の Secret（grafana/discord-webhook）を参照する。
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaContactPoint
+metadata:
+  name: discord
+  namespace: grafana
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: grafana
+  name: discord
+  receivers:
+    - type: discord
+      settings:
+        title: Grafana
+      valuesFrom:
+        - targetPath: url
+          valueFrom:
+            secretKeyRef:
+              name: discord-webhook
+              key: url
