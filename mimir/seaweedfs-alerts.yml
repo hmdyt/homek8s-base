@@ -28,3 +28,17 @@ spec:
           annotations:
             summary: "SeaweedFS cannot allocate a writable volume for writes"
             description: "Write allocations are failing ({{ $value | humanize }} per second). Check `volume.growth.frozen`, the topology Max/Free counters, and free space on the volume server."
+        # Volume slots, not disk space, run out first: the master caps the
+        # count at (volume server disk size / volumeSizeLimitMB), which is 993
+        # with 1GiB volumes on a 1TiB disk. A cluster can be 55% empty by bytes
+        # and still have no room for a new volume.
+        - alert: SeaweedfsVolumeSlotsLow
+          expr: |
+            sum by (cluster) (SeaweedFS_volumeServer_volumes)
+            / max by (cluster) (SeaweedFS_volumeServer_max_volumes) > 0.97
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "SeaweedFS volume slots nearly exhausted in {{ $labels.cluster }}"
+            description: "{{ $value | humanizePercentage }} of the volume slots are in use. At 100% no new volume can be created and writes fail with `no writable volumes` even though the disk has free space. Grow the volume PVC, or raise volumeSizeLimitMB together with an explicit -max."
