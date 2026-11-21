@@ -15,7 +15,8 @@ spec:
     - uid: paseo-disk-used-ratio-warning
       title: paseo の / 使用率が 80% 超え
       condition: C
-      noDataState: NoData
+      # 一時的な空応答で DatasourceNoData を出さない（欠落検知は 4 本目が担当）
+      noDataState: OK
       execErrState: Error
       for: 10m
       annotations:
@@ -53,7 +54,7 @@ spec:
     - uid: paseo-disk-used-ratio-critical
       title: paseo の / 使用率が 90% 超え
       condition: C
-      noDataState: NoData
+      noDataState: OK
       execErrState: Error
       for: 5m
       annotations:
@@ -91,7 +92,7 @@ spec:
     - uid: paseo-disk-free-low
       title: paseo の / の空きが 10GiB 未満
       condition: C
-      noDataState: NoData
+      noDataState: OK
       execErrState: Error
       for: 30m
       annotations:
