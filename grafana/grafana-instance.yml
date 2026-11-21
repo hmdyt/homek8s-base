@@ -27,7 +27,7 @@ spec:
         spec:
           containers:
             - name: image-renderer
-              image: grafana/grafana-image-renderer:latest
+              image: grafana/grafana-image-renderer:latest@sha256:cfa6c8f63e6d626f90208f2880f15bd5facc279daec1b9bb642af07aa850d95e
               env:
                 - name: BROWSER_READINESS_TIMEOUT
                   value: "120s"
