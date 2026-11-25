@@ -99,6 +99,10 @@ spec:
         gateway:
           enabled: true
           replicas: 1
+          # chart 6.55 の gateway は hostname 単位の required anti-affinity を持つので、
+          # 1 ノードの base クラスタでは RollingUpdate が新しい Pod を載せられず Pending で止まる。
+          deploymentStrategy:
+            type: Recreate
           service:
             type: ClusterIP
           ingress:
