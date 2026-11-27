@@ -7,9 +7,10 @@ spec:
   project: default
   sources:
     - repoURL: https://github.com/SynologyOpenSource/synology-csi.git
-      # v1.4.0 の release はあるが Docker Hub に synology/synology-csi:v1.4.0 が publish されていない
-      # （Hub は v1.3.1 まで）。main を追うと ImagePullBackOff で CSI が起動しないため固定する。
-      targetRevision: v1.4.0
+      # v1.4.0 の tag はあるが Docker Hub に synology/synology-csi:v1.4.0 が publish されていない
+      # （Hub は v1.3.1 まで）。v1.4.0 に上げると csi-plugin が ImagePullBackOff で起動せず、
+      # iSCSI ボリュームの unstage ができないため Pod の削除も止まる。renovate.json で更新を止めてある。
+      targetRevision: v1.3.1
       path: deploy/kubernetes/v1.20
       directory:
         recurse: false
