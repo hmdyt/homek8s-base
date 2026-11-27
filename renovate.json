@@ -7,9 +7,22 @@
     ":pinVersions"
   ],
   "argocd": {
-    "managerFilePatterns": ["/^installs/.+\\.yml$/"]
+    "managerFilePatterns": [
+      "/^installs/.+\\.yml$/"
+    ]
   },
   "kubernetes": {
-    "managerFilePatterns": ["/(^|/)[^/]+\\.ya?ml$/"]
-  }
+    "managerFilePatterns": [
+      "/(^|/)[^/]+\\.ya?ml$/"
+    ]
+  },
+  "packageRules": [
+    {
+      "description": "synology-csi: v1.4.0 のイメージが Docker Hub に publish されておらず csi-plugin が起動しないため更新しない（installs/synology-csi.yml 参照）",
+      "matchPackageNames": [
+        "/synology-csi/"
+      ],
+      "enabled": false
+    }
+  ]
 }
